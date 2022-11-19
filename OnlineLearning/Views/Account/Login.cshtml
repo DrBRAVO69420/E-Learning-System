@@ -1,0 +1,91 @@
+﻿@model OnlineLearning.Models.LoginViewModel
+@{
+    ViewBag.Title = "Log in";
+}
+<style>
+    body {
+        background-color: #080320;
+    }
+</style>
+
+<div class="largePaddingLeftRight w3-padding-48">
+    <div class="row">
+        <div class="col-md-12 centerBlock">
+            @if (TempData["RegisterAdminSuccess"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade in centerBlock" style="margin-bottom:16px">
+                    <a href="#" class="close link" data-dismiss="alert" aria-label="close" style="font-size:30px;">&times;</a>
+                    @TempData["RegisterAdminSuccess"]
+                </div>
+            }
+            <div class="col-md-12 w3-white padding-32" style="border-radius:10px">
+                <div class="col-md-5">
+                    <img src="~/Assest/login.png" class="img-responsive" /> <!--1080px * 1080px-->
+                </div>
+                <div class="col-md-6" style="padding-left:0px">
+                    @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        if (TempData["ProfileUpdateSuccess"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade in centerBlock">
+                                <a href="#" class="close link" data-dismiss="alert" aria-label="close" style="font-size:30px;">&times;</a>
+                                @TempData["ProfileUpdateSuccess"]
+                            </div>
+                        }
+                        <h3 class="text-indigo text-center w3-padding-24 bolder"><b>LOG IN</b></h3>
+                        @Html.ValidationSummary("", new { @class = "text-danger text-center" })
+                        @*<div class="form-group">
+                            <label class="col-md-4 control-label">Demo Account</label>
+                            <div class="col-md-8">
+                               <button class="small button-indigo padding-5" type="button" onclick="loadAdmin()">Admin</button>
+                               <button class="small button-indigo padding-5" type="button" onclick="loadInstructor()">Instructor</button>
+                               <button class="small button-indigo padding-5" type="button" onclick="loadStudent()">Student</button>
+                            </div>
+                        </div>*@
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.UserName, new { @class = "col-md-4 control-label required" })
+                            <div class="col-md-8">
+                                @Html.Kendo().TextBoxFor(m => m.UserName)
+                                @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Password, new { @class = "col-md-4 control-label required" })
+                            <div class="col-md-8">
+                                @Html.Kendo().TextBoxFor(m => m.Password).HtmlAttributes(new { type = "password" })
+                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group" style="font-size:13px">
+                            <div class="col-md-offset-4 col-md-8">
+                                <span>@Html.Kendo().CheckBoxFor(m => m.RememberMe).Checked(true)</span>
+                                @Html.ActionLink("Forgot your password?", "ForgotPassword", null, new { style = "padding-top:0;margin-top:0;float:right", @class = "link" })
+                            </div>
+                        </div>
+                        <div class="form-group w3-padding-16">
+                            <div class="col-md-offset-4 col-md-8">
+                                <input type="submit" value="Log in" class="button-indigo width100" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<script>
+    function loadAdmin() {
+        $("#UserName").val("admin");
+        $("#Password").val("admin123");
+    }
+    function loadInstructor() {
+        $("#UserName").val("instructor");
+        $("#Password").val("instructor123");
+    }
+    function loadStudent() {
+        $("#UserName").val("jessica");
+        $("#Password").val("jessica123");
+    }
+</script>*@

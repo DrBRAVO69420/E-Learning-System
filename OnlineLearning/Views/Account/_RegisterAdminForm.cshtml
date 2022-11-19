@@ -1,0 +1,76 @@
+﻿@model OnlineLearning.Models.RegisterAdminViewModel
+
+@using (Html.BeginForm("RegisterAdmin", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    if (TempData["ProfileUpdateSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade in centerBlock">
+            <a href="#" class="close link" data-dismiss="alert" aria-label="close" style="font-size:30px;">&times;</a>
+            @TempData["ProfileUpdateSuccess"]
+        </div>
+    }
+    <div class="w3-padding-16">
+        <h3 class="text-indigo text-center bolder"><b>REGISTER ADMIN</b></h3>
+        <p class="text-center" id="loginLink">Already have an account? @Html.ActionLink("Log in", "Login", null, new { @class = "link" })</p>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Username, new { @class = "col-md-4 control-label required" })
+        <div class="col-md-8">
+            @Html.Kendo().TextBoxFor(m => m.Username)
+            @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new { @class = "col-md-4 control-label required" })
+        <div class="col-md-8">
+            @Html.Kendo().TextBoxFor(m => m.Email)
+            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <span class="col-md-4 control-label required">
+            @Html.LabelFor(m => m.Password)
+            <i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="right" title="Requirement: At least 6 characters, include one lowercase and one digit."></i>
+        </span>
+        <div class="col-md-8">
+            <div class="col-md-11 padding-0">
+                @Html.Kendo().TextBoxFor(m => m.Password).HtmlAttributes(new { type = "password" })
+            </div>
+            <div class="col-md-1 padding-0">
+                <span id="showHidePasswordBtn" onclick="showHidePassword()" class="padding-10 pointer-cursor link">
+                    <i id="eyeOpenIcon" class="w3-xlarge glyphicon glyphicon-eye-open" data-toggle="tooltip" data-placement="top" title="Show Password"></i>
+                    <i id="eyeCloseIcon" class="w3-xlarge glyphicon glyphicon-eye-close" title="Hide Password" style="display:none"></i>
+                </span>
+            </div>
+            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-4 control-label required" })
+        <div class="col-md-8">
+            @Html.Kendo().TextBoxFor(m => m.ConfirmPassword).HtmlAttributes(new { type = "password" })
+            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name, new { @class = "col-md-4 control-label required" })
+        <div class="col-md-8">
+            @Html.Kendo().TextBoxFor(m => m.Name)
+            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group ">
+        @Html.LabelFor(m => m.Gender, new { @class = "col-md-4 control-label required" })
+        <div class="col-md-8">
+            @Html.Kendo().RadioButtonFor(m => m.Gender).Value("Male").Name("Gender").Label("Male")
+            @Html.Kendo().RadioButtonFor(m => m.Gender).Value("Female").Name("Gender").Label("Female")
+            @Html.ValidationMessageFor(m => m.Gender, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group w3-padding-16">
+        <div class="col-md-offset-4 col-md-8">
+            <input type="submit" value="Register" class="button-indigo width100" />
+        </div>
+    </div>
+}

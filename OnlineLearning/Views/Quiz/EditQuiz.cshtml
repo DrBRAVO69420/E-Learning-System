@@ -1,0 +1,121 @@
+﻿@model OnlineLearning.Models.QuizViewModels
+@{
+    ViewBag.Title = "Create / Edit Quiz";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+    <div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.CourseChannelId})"> Quiz List</a></li>
+                @if (Model.Id == null || Model.Id == Guid.Empty)
+                {
+                    <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquiz" ? "active-breadcrumb-item" : "")" href="@Url.Action("editquiz","quiz")"> Add Quiz</a></li>
+                }
+                else
+                {
+                    <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquiz" ? "active-breadcrumb-item" : "")" href="@Url.Action("editquiz","quiz",new { Id = Model.Id})"> Edit Quiz</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.CourseChannelId})"> Quiz List</a></li>
+        @if (Model.Id == null || Model.Id == Guid.Empty)
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquiz" ? "active-breadcrumb-item" : "")" href="@Url.Action("editquiz","quiz")"> Add Quiz</a></li>
+        }
+        else
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquiz" ? "active-breadcrumb-item" : "")" href="@Url.Action("editquiz","quiz",new { Id = Model.Id})"> Edit Quiz</a></li>
+        }
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    @if (Model.Id == null || Model.Id == Guid.Empty)
+    {
+        <h3 class="text-indigo bolder">Add Quiz</h3>
+    }
+    else
+    {
+        <h3 class="text-indigo bolder">Edit Quiz</h3>
+    }
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top" style="padding-bottom:50px">
+    <div class="w3-white w3-card w3-padding-16 mediumPaddingLeftRight">
+        @using (Html.BeginForm("EditQuiz", "Quiz", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.CourseChannelId)
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        @Html.LabelFor(m => m.QuizTitle, new { @class = "required" })
+                    </div>
+                    <div class="row">
+                        @Html.Kendo().TextBoxFor(m => m.QuizTitle)
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.QuizTitle, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        @Html.LabelFor(m => m.DueDateTime)
+                    </div>
+                    <div class="row">
+                        @Html.Kendo().DateTimePickerFor(m => m.DueDateTime).Format("yyyy-MM-dd hh:mm tt").Min(DateTime.Now).HtmlAttributes(new { @class = "input-width50" })
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.DueDateTime, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        @Html.LabelFor(m => m.Instruction, new { @class = "required" })
+                    </div>
+                    <div class="row">
+                        @Html.TextAreaFor(m => m.Instruction, new { @rows = 4, @class = "width100 k-textbox" })
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.Instruction, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        @Html.LabelFor(m => m.RandomizeQuestion, new { @class = "required" })
+                        <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right"
+                           title="If set to Yes, every students will answer the quiz questions in different orders."></i>
+                    </div>
+                    <div class="row">
+                        @Html.Kendo().RadioButtonFor(m => m.RandomizeQuestion).Value(true).Label("Yes").Checked(true)
+                        @Html.Kendo().RadioButtonFor(m => m.RandomizeQuestion).Value(false).Label("No")
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.RandomizeQuestion, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row w3-padding-16 text-center">
+                <span class="smallPaddingLeftRight">
+                    <a href="@Url.Action("list","quiz",new { Id = Model.TopNavViewModels.CourseChannelId})" class="btn w3-white w3-border-indigo w3-hover-opacity w3-round-large btn-lg">Back</a>
+                </span>
+                <span class="smallPaddingLeftRight">
+                    <input class="button-indigo" value="Submit" type="submit" />
+                </span>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();        
+    });
+</script>

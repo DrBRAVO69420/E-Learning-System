@@ -1,0 +1,204 @@
+﻿@model OnlineLearning.Models.CourseChannelViewModel
+@*@model IEnumerable<OnlineLearning.Models.CourseChannelViewModel>*@
+
+@{
+    ViewBag.Title = "Manage";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<div style="padding-left:17px;padding-right:17px;">
+    <div class="row" >
+        <div class="w3-panel sectionHeading w3-padding-16">
+            <h3 class="text-indigo bolder" style="display:inline">
+                <i class="glyphicon glyphicon-briefcase"></i> Your Course Channels
+            </h3>
+            <span class="smallPaddingLeftRight">
+                <button class="button-indigo small" onclick="openAddCourseChannel()"><i class="fa fa-plus"></i> Add New <i id="downArrow" class="glyphicon glyphicon-chevron-down smallPaddingLeftRight"></i><i id="upArrow" class="glyphicon glyphicon-chevron-up smallPaddingLeftRight" style="display:none"></i></button>
+            </span>
+            <span class="smallPaddingLeftRight">
+                <i class="glyphicon glyphicon-th link w3-xlarge smallPaddingLeftRight pointer-cursor" title="Grid View" onclick="gridView()"></i>
+                <i class="glyphicon glyphicon-th-list link w3-xlarge smallPaddingLeftRight pointer-cursor" title="List View" onclick="listView()"></i>
+            </span>
+        </div>
+    </div>
+    <div id="addCourseForm" class="w3-card w3-margin-bottom w3-white w3-round-medium mediumPaddingLeftRight smallPaddingTopBottom" style="display:none">
+        @Html.Partial("~/Views/CourseChannel/_EditCourseChannelForm.cshtml")
+    </div>
+    <div class="row">
+        <div class="col-md-9 padding-0">
+            <input id="search" type="text" class="k-textbox" value="@Context.Request.QueryString["search"]" placeholder="Search Course Channel" />
+        </div>
+        <div class="col-md-3">
+            <button class="button-indigo" type="button" onclick="searchCourse()"><i class="glyphicon glyphicon-search"></i> Search</button>
+            <button class="button-indigo" onclick="clearSearch()">Clear</button>
+        </div>
+    </div>
+</div>
+
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+
+<!--By default, grid view-->
+<div id="grid" class="w3-padding-16 padding-0">
+    @Html.Partial("~/Views/Shared/_CourseChannelGrid.cshtml")
+</div>
+<div id="list" class="w3-padding-16" style="display:none">
+    @Html.Partial("~/Views/Shared/_CourseChannelList.cshtml")
+</div>
+
+
+<div class="modal fade" id="deleteProcessModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Processing... Please Wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteSuccessModal" role="dialog">
+    <div class="modal-dialog ">
+        <!-- Modal content-->
+        <div class="modal-content background-indigo-black">
+            <div class="modal-body text-center">
+                <!--icon-->
+                <div class="row">
+                    <i class="glyphicon glyphicon-ok-circle" style="font-size:50px;color:greenyellow"></i>
+                </div>
+                <!--header-->
+                <div class="row paddingTopBottom" style="color:greenyellow">
+                    <b style="font-size:20px">Success!</b>
+                </div>
+                <!--body-->
+                <div class="row" style="color:white">
+                    <p>
+                        Course Channel has been deleted!
+                    </p>
+                </div>
+                <!--close button-->
+                <div class="row" style="padding:10px 2px 25px 2px">
+                    <button type="button" class="button-indigo" onclick="closeDeleteSuccessModal()">Close</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    if ('@TempData["NameEmpty"]' != null && '@TempData["NameEmpty"]' != "") {
+        displayError("@TempData["NameEmpty"]");
+    }
+    if ('@TempData["DescriptionEmpty"]' != null && '@TempData["DescriptionEmpty"]' != "") {
+        displayError("@TempData["DescriptionEmpty"]");
+    }
+    if ('@TempData["AllEmpty"]' != null && '@TempData["AllEmpty"]' != "") {
+        displayError("@TempData["AllEmpty"]");
+    }
+    if ('@ViewBag.Grid' == "True") {
+        showGrid();
+    }
+    if ('@ViewBag.List' == "True") {
+        showList();
+    }
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    function openAddCourseChannel() {
+        if ($("#addCourseForm").is(":visible")) {
+            $("#addCourseForm").slideUp("fast", function() {});
+            $("#upArrow").hide();
+            $("#downArrow").show();
+        }
+        else {
+            $("#addCourseForm").slideDown( "fast", function() {});
+            $("#upArrow").show();
+            $("#downArrow").hide();
+        }
+    }
+    function showList() {
+        $("#grid").hide();
+        $("#list").show();
+    }
+      function showGrid() {
+        $("#grid").show();
+        $("#list").hide();
+    }
+    function listView() {
+        var query = $("#search").val();
+        if (query != "" && query != null) {
+            location.href = "@Url.Action("list","coursechannel")?search=" + query + "&view=list";
+        } else {
+            location.href = "@Url.Action("list","coursechannel")?view=list";
+        }
+    }
+    function gridView() {
+         var query = $("#search").val();
+        if (query != "" && query != null) {
+            location.href = "@Url.Action("list","coursechannel")?search=" + query + "&view=grid";
+        } else {
+            location.href = "@Url.Action("list","coursechannel")?view=grid";
+        }
+    }
+    $('#search').keypress(function (e) {
+         var key = e.which;
+         if(key == 13)  // the enter key code
+         {
+             searchCourse();
+          }
+        });
+    function searchCourse() {
+        var query = $("#search").val();
+         if ('@ViewBag.Grid' == "True") {
+             location.href = "@Url.Action("list","coursechannel")?search=" + query + "&view=grid";
+        }
+        if ('@ViewBag.List' == "True") {
+            location.href = "@Url.Action("list","coursechannel")?search=" + query + "&view=list";
+        }
+    }
+
+    function clearSearch() {
+        if ('@ViewBag.Grid' == "True") {
+            location.href = "@Url.Action("list","coursechannel")?view=grid";
+        }
+        if ('@ViewBag.List' == "True") {
+            location.href = "@Url.Action("list","coursechannel")?view=list";
+        } else {
+            location.href = "@Url.Action("list","coursechannel")?view=grid";
+        }
+    }
+
+    function deleteCourse(courseId, coursename) {
+        if (confirm("You are about to delete " + coursename + ". All the quizzes, assignment, announcement, discussion topics will also be deleted and cannot be recovered. Are you sure to delete this course channel?")) {
+            $("#deleteProcessModal").modal("show");
+            $.ajax({
+                url: '@Url.Action("Delete_CourseChannel", "CourseChannel")',
+                data: {  Id: courseId },
+                type: "GET",
+                success: function (errorMsg) {
+                    if (errorMsg == "") {
+                         $("#deleteProcessModal").modal("hide");
+                        $("#deleteSuccessModal").modal("show");                      
+                    }
+                },
+                error: function (errorMsg) {
+                    $("#processingUnenroll").hide();
+                    displayError(errorMsg);
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function closeDeleteSuccessModal() {
+        $("#deleteSuccessModal").modal("hide");
+        location.reload();
+    }
+    $('#deleteSuccessModal').on('hidden.bs.modal', function () {
+      location.reload();
+    })
+
+</script>

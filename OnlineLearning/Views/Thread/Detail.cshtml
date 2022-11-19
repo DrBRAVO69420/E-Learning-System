@@ -1,0 +1,287 @@
+﻿@model OnlineLearning.Models.ThreadViewModels
+@using Microsoft.AspNet.Identity;
+@{
+    ViewBag.Title = "Discussion Detail";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var loginUserId = User.Identity.GetUserId();
+}
+<style>
+    .btn-danger {
+        border-radius: 7px;
+    }
+
+        .btn-danger:hover {
+            background-color: transparent;
+            color: #d43f3a;
+        }
+</style>
+<div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "coursechannel" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","thread",new { Id = Model.TopNavViewModels.CourseChannelId})"> Discussion List</a></li>
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","thread",new { Id = Model.Id})"> Discussion Detail</a></li>
+        </ul>
+    </div>
+</div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "coursechannel" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","thread",new { Id = Model.TopNavViewModels.CourseChannelId})"> Discussion List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","thread",new { Id = Model.Id})"> Discussion Detail</a></li>
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        @Model.ThreadTitle
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="col-md-12 w3-white w3-card mediumPaddingLeftRight w3-padding-16" id="@Model.Id">
+        <div class="row">
+            <div class="col-md-1">
+                <a class="w3-hide-small" href="@Url.Action("profile","account",new { Id = Model.UserId})" target="_blank"><img src="~/UploadedFiles/@Model.ProfilePic" alt="profilePic" class="img-circle gold-border" style="width: 60px " /></a>
+            </div>
+            <div class="col-md-11">
+                <h4 class="text-indigo bolder one-line-text">
+                    @Model.ThreadTitle
+                </h4>
+                <div class="row" style="font-size:13px">
+                    By <a class="link bolder" href="@Url.Action("profile","account",new { Id = Model.UserId})" target="_blank">@Model.Name</a> , Last Update on @Html.DisplayFor(m => m.LastUpdate)
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1">
+
+            </div>
+            <div class="col-md-11">
+                <div class="row" style="overflow:hidden;text-overflow:ellipsis">
+                    @Html.Raw(Model.Content)
+                </div>
+            </div>
+        </div>
+        <div class="row text-right padding-0">
+            <button class="button-indigo btn small" style="padding:5px" type="button" onclick="OpenReplyForm('@Model.Name', '@Model.Id','Thread')"><i class="fa fa-mail-reply"></i> Reply</button>
+        </div>
+    </div>
+</div>
+
+@foreach (var post in Model.PostList)
+{
+    <div class="row">
+        <div class="col-md-12 w3-white w3-card mediumPaddingLeftRight w3-padding-16" id="@post.Id">
+            <div class="row">
+                <div class="col-md-1">
+                    <a class="w3-hide-small" href="@Url.Action("profile","account",new { Id = post.UserId})" target="_blank"><img src="~/UploadedFiles/@post.ProfilePic" alt="profilePic" class="img-circle gold-border" style="width:60px" /></a>
+                </div>
+                <div class="col-md-11">
+                    @if (post.PostId != null)
+                    {
+                        <h4 class="one-line-text pointer-cursor text-indigo bolder" onclick="goToPost('@post.PostId')">
+                            Re: @post.ReplyToContent
+                        </h4>
+                    }
+                    else
+                    {
+                        <h4 class="text-indigo bolder pointer-cursor one-line-text" onclick="goToPost('@post.ThreadId')">
+                            @post.Title
+                        </h4>
+                    }
+                    <div class="row" style="font-size:13px">
+                        By <a class="link bolder" href="@Url.Action("profile","account",new { Id = post.UserId})" target="_blank">@post.UserFullName</a> , Last Update on @post.LastUpdate
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-1">
+
+                </div>
+                <div class="col-md-11">
+                    <div class="row" style="overflow:hidden;text-overflow:ellipsis">
+                        @Html.Raw(post.Content)
+                    </div>
+                </div>
+            </div>
+            @if (post.PostReplies.Count != 0)
+            {
+                <div class="row small">
+                    <div class="col-md-1">
+
+                    </div>
+                    <div class="col-md-11">
+                        <i class="fa fa-eye smallPaddingLeftRight text-gold bolder"></i><a class="smallPaddingLeftRight link bolder pointer-cursor" onclick="highlightReply('@post.Id')">View Replies (@post.PostReplies.Count) @*<i class="glyphicon glyphicon-chevron-down"></i>*@</a>
+                        <i class="fa fa-remove smallPaddingLeftRight text-gold bolder"></i><a class="smallPaddingLeftRight link bolder pointer-cursor " onclick="unhighlightAllReplies('@post.Id')">Unhighlight Replies @*<i class="glyphicon glyphicon-chevron-down"></i>*@</a>
+                    </div>
+                </div>
+            }
+
+            <div class="row text-right padding-0">
+                <button class="button-indigo small" style="padding:5px" type="button" onclick="OpenReplyForm('@post.UserFullName', '@post.Id','Post')"><i class="fa fa-mail-reply"></i> Reply</button>
+                @if (post.UserId == loginUserId)
+                {
+                    <button class="btn btn-danger small" style="padding:5px;" type="button" onclick="DeleteReply('@post.Id')"><i class="glyphicon glyphicon-trash "></i> Delete</button>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!--Reply Form-->
+<div class="row bottom" id="replyForm" style="display:none">
+    <div class="w3-white w3-card mediumPaddingLeftRight smallPaddingTopBottom">
+        @using (Html.BeginForm("Detail", "Thread", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+        {
+            <div class="row">
+                <h4 class="bolder text-indigo">
+                    Reply To:
+                    @Html.TextBoxFor(m => m.PostViewModels.ReceiverName, new { @readonly = "readonly", @class = "w3-border-0 smallPaddingLeftRight smallPaddingTopBottom" })
+                    <i class="fa fa-remove w3-right pointer-cursor" onclick="closeReplyForm()"></i>
+                </h4>
+            </div>
+            @Html.HiddenFor(m => m.TopNavViewModels.CourseChannelId)
+            @Html.HiddenFor(m => m.TopNavViewModels.CourseChannelName)
+            @Html.HiddenFor(m => m.TopNavViewModels.ImageSource)
+            @Html.HiddenFor(m => m.ProfilePic)
+            @Html.HiddenFor(m => m.Name)
+            @Html.HiddenFor(m => m.LastUpdate)
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.ThreadTitle)
+            @Html.HiddenFor(m => m.Content)
+            @Html.HiddenFor(m => m.PostViewModels.Id)
+            @Html.HiddenFor(m => m.PostViewModels.ThreadId)
+            @Html.HiddenFor(m => m.PostViewModels.PostId)
+            <div class="row">
+                @Html.LabelFor(m => m.PostViewModels.Content, new { @class = "required" })
+            </div>
+            <div class="row">
+                @(Html.Kendo()
+                       .EditorFor(m => m.PostViewModels.Content)
+                       .Tools(tools => tools
+                           .Clear()
+                           .Formatting()
+                           .Bold()
+                           .Italic()
+                           .Underline()
+                           .Strikethrough()
+                           .Outdent()
+                           .JustifyLeft()
+                           .JustifyCenter()
+                           .JustifyRight()
+                           .JustifyFull()
+                           .Indent()
+                           .InsertOrderedList()
+                           .InsertUnorderedList()
+                           .CreateLink()
+                           .TableEditing()
+                           .FontColor()
+                           .BackColor()
+                       )
+                   .Encode(false)
+                   .StyleSheets(css => css.Add(Url.Content("~/Content/customstyle.css")).Add(Url.Content("~/Content/w3css.css")))
+                   .Resizable(true)
+                   .Value(@<text>
+
+                </text>)
+                )
+            </div>
+            <div class="row">
+                @Html.ValidationMessageFor(m => m.PostViewModels.Content, "", new { @class = "alert alert-danger", @id = "contentError" })
+            </div>
+            <div class="row">
+                <button class="button-white btn btn-lg w3-hover-text-cyan" type="button" onclick="closeReplyForm()">Cancel</button>
+                <button class="button-indigo btn btn-lg" type="submit">Reply</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+       if ('@TempData["ReplyPosted"]' != null && '@TempData["ReplyPosted"]' != "") {
+        displaySuccess("'@TempData["ReplyPosted"]'");
+    }
+
+       $(document).ready(function () {
+           if ($("#contentError").text() != null && $("#contentError").text() != "") {
+               $("#replyForm").show();
+           } else {
+               $("#contentError").hide();
+           }
+       });
+    function OpenReplyForm(userFullName, postId, type) {
+        var replyform = document.getElementById("replyForm");
+           $("#replyForm").show();
+           $("#replyForm").addClass("w3-animate-bottom");
+           $("#PostViewModels_ReceiverName").val(userFullName);
+           if (type == 'Thread') {
+               $("#PostViewModels_ThreadId").val(postId);
+           }
+           if (type == 'Post') {
+               $("#PostViewModels_PostId").val(postId);
+           }
+           replyform.scrollIntoView();
+       }
+       function closeReplyForm() {
+           $("#replyForm").hide();
+    }
+    function highlightReply(postId) {
+        $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetPostReplies", "Thread")',
+                data: { Id: postId },
+                cache: false,
+                success: function (result) {
+                    $.each(result, function (index, value) {
+                        $("#" + value).css("background-color","#e4e8ed");
+                        $("#" + value).removeClass("w3-white");
+                    });
+                }
+            });
+
+    }
+    function unhighlightAllReplies(postId) {
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetPostReplies", "Thread")',
+                data: { Id: postId },
+                cache: false,
+                success: function (result) {
+                    $.each(result, function (index, value) {
+                         $("#" + value).addClass("w3-white");
+                    });
+                }
+            });
+    }
+    function goToPost(postId) {
+        location.href = "@Url.Action("detail","thread",new { Id = ""})/" + "@Model.Id" + "#" + postId;
+         $("#" + postId).removeClass("w3-white");
+        $("#" + postId).css("background-color", "#e4e8ed");
+        setTimeout(function () {
+            $("#" + postId).addClass("w3-white");
+        }, 3000);
+
+    }
+    function DeleteReply(postId) {
+        if (confirm("Are you sure to delete this reply?")) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("Delete_Reply", "Thread")',
+                data: { Id: postId },
+                cache: false,
+                success: function (result) {
+                    if (result == "") {
+                        displaySuccess("Reply Deleted Successfully!");
+                        setTimeout(function () {
+                            location.reload();
+                        }, 300);
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+</script>

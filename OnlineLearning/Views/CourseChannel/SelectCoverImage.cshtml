@@ -1,0 +1,69 @@
+﻿@model OnlineLearning.Models.ThemeViewModel
+@{
+    ViewBag.Title = "Select Cover Image";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        Select Cover Image for @Model.CourseChannelName 
+        <a class="link bolder smallPaddingLeftRight w3-small" href="@Url.Action("manage","coursechannel",new { Id =Model.CourseChannelId })">Back to Course Channel Home</a>
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="w3-white w3-card mediumPaddingLeftRight">
+        @foreach (var item in Model.CategoryList)
+        {
+        <div class="row">
+
+            <h3 class="w3-border-bottom bolder text-center w3-light-gray">@item.CategoryName</h3>
+            @foreach (var theme in Model.ThemeList)
+            {
+                if (theme.CategoryName.Equals(item.CategoryName))
+                {
+                    <div class="col-md-3 col-sm-12 w3-margin-bottom pointer-cursor" onclick="selected('@theme.Id')">
+                        <img id="@theme.Id" src="@theme.ImageSource" class="img-responsive w3-hover-shadow" style="border:5px solid white" />
+                    </div>
+                }
+            }
+        </div>
+        }
+        <div class="row text-center" style="padding-bottom:20px">
+            <button class="button-white w3-hover-text-black btn btn-lg" type="button" onclick="backToCourseHome()">Back to Course Channel</button>
+            <button class="button-indigo btn btn-lg" type="button" onclick="changeCoverImage()">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var selectedImg;
+    function selected(id) {
+        console.log(id);
+        $("img").removeClass("w3-border-blue");
+        $("#" + id).addClass("w3-border-blue");
+        selectedImg = id;
+    }
+        
+    function changeCoverImage() {
+        console.log(selectedImg);
+        $.ajax({
+                type: "POST",
+                url: '@Url.Action("ChangeCoverImage", "CourseChannel")',
+                data: { courseChannelId: '@Model.CourseChannelId' , themeId: selectedImg},
+                cache: false,
+                success: function (response) {
+                    if (response) {
+                        displayError(response);
+                    } else {
+                        location.href = "@Url.Action("manage","coursechannel",new { Id = Model.CourseChannelId })";
+                    }
+                }
+            });
+    }
+    function backToCourseHome() {
+        location.href = "@Url.Action("manage","coursechannel",new { Id = Model.CourseChannelId })";
+    }
+</script>

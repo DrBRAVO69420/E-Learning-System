@@ -1,0 +1,214 @@
+﻿@model OnlineLearning.Models.QuizQuestionViewModels
+@{
+    ViewBag.Title = "Question List";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+    <div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz", new { Id =Model.QuizDetail.CourseChannelId })"> Quiz List</a></li>
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "questionlist" ? "active-breadcrumb-item" : "")" href="@Url.Action("questionlist","quiz", new { Id =Model.QuizId })"> @Model.QuizDetail.QuizTitle Question List</a></li>
+            </ul>
+        </div>
+    </div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz", new { Id =Model.QuizDetail.CourseChannelId })"> Quiz List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "questionlist" ? "active-breadcrumb-item" : "")" href="@Url.Action("questionlist","quiz", new { Id =Model.QuizId })"> @Model.QuizDetail.QuizTitle Question List</a></li>
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder smallPaddingTopBottom">
+        Questions for @Model.QuizDetail.QuizTitle
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="w3-white w3-card mediumPaddingLeftRight">
+        <div class="row">
+            <div class="col-md-2">
+                @Html.LabelFor(m => m.QuizDetail.QuizTitle)
+            </div>
+            <div class="col-md-10">
+                @Html.DisplayFor(m => m.QuizDetail.QuizTitle)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                @Html.LabelFor(m => m.QuizDetail.Instruction)
+            </div>
+            <div class="col-md-10">
+                @Html.DisplayFor(m => m.QuizDetail.Instruction)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                @Html.LabelFor(m => m.QuizDetail.DueDateTime)
+            </div>
+            <div class="col-md-10">
+                @if (Model.QuizDetail.DueDateTime == null)
+                {
+                    <span class="text-warning">No Due Date</span>
+                }
+                else
+                {
+                    @Html.DisplayFor(m => m.QuizDetail.DueDateTime)
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row w3-padding-16">
+    <div class="row">
+        @(Html.Kendo().Grid<OnlineLearning.Models.QuizQuestionViewModels>()
+                    .Name("QuizQuestionGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Question List").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                        columns.Bound(c => c.Id).Hidden();
+                        columns.Bound(c => c.QuizId).Hidden();
+                        columns.Bound(c => c.Question).ClientTemplate("<a class='link bolder' href='" +
+                            Url.Action("editquestion", "quiz") +
+                            "?quizId=#=QuizId#&questionId=#=Id#' >#=Question#</a>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.AnswerList).Filterable(f => f.Enabled(false)).ClientTemplate("<button class='link bolder w3-border-0 w3-transparent' onclick=\"openAnswerModal(\'#=QuizId#\',\'#=Id#\')\">View Answer Choices</button>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.AttachedImage)
+                        .HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" })
+                        .ClientTemplate("#if(data.AttachedImage == null){# <span class='bolder text-warning'>No Image</span> #}else{# <a href='/UploadedFiles/#:data.AttachedImage#' target='_blank'><img src='/UploadedFiles/#=data.AttachedImage#' style='width:65px;' class='img-responsive' /></a> <span>  #:data.AttachedImage#</span> #}#").Media("(min-width: 420px)");
+                        columns.Bound(c => c.strLastUpdate).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        //columns.Bound(c => c.LastUpdate).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Command(command =>
+                        {
+                            command.Custom("Edit").IconClass(" ").Text("<span class='forTooltips' title='Edit'><i class='glyphicon glyphicon-pencil edit-btn' style='font-size:18px'></i></span>").Click("EditSelectedQuestion");
+                            command.Custom("Destroy").IconClass(" ").Text("<span class='forTooltips' title='Delete'><i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i></span>").Click("DeleteSelectedQuestion");
+                            command.Custom("DeleteImage").IconClass(" ").Text("<span class='forTooltips' title='Delete Image'><i class='fa fa-remove disable-btn'></i><i class='fa fa-file-image-o disable-btn'></i></span>").Click("DeleteSelectedImage").HtmlAttributes(new { id = "DeleteImgBtn" });
+                        })
+                        .Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+                    })
+.ToolBar(toolbar => toolbar.Custom().Name("addQuestionBtn").Action("editquestion", "quiz", new { quizId = Model.QuizId }).IconClass("k-icon k-i-plus").Text("Add Question").HtmlAttributes(new { @id = "addQuestionBtn", @class = "button-indigo" }))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_QuizQuestion", "Quiz", new { QuizId = Model.QuizId }))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("onDataBoundGrid"))
+        )
+    </div>
+
+</div>
+@(Html.Kendo().Tooltip()
+      .For("#QuizQuestionGrid")
+      .Filter(".forTooltips")
+      .Position(TooltipPosition.Top)
+)
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">
+        <b>
+            <a class='link bolder' href='@Url.Action("editquestion","quiz")?quizId=#=QuizId#&questionId=#=Id#'>#=Question#</a>
+        </b>
+    </p>
+    <p class="col-template-val"><button class='link bolder w3-border-0 w3-transparent padding-0' onclick="openAnswerModal('#=data.QuizId#','#=data.Id#')">View Answer Choices</button></p>
+    <p class="col-template-val">
+        #if(data.AttachedImage == null){# <span class='bolder text-warning'>No Image</span> #}else{# <a href='/UploadedFiles/#:data.AttachedImage#' target='_blank'><img src='~/UploadedFiles/#=data.AttachedImage#' style='width:65px;' class='img-responsive' /></a> <span>  #:data.AttachedImage#</span> #}#
+    </p>
+    <p class="col-template-val">
+        #=strLastUpdate#
+    </p>
+</script>
+
+<script>
+      $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+      });
+     if ('@TempData["QuestionUpdated"]' != null && '@TempData["QuestionUpdated"]' != "") {
+        displaySuccess("'@TempData["QuestionUpdated"]'");
+    }
+
+    function onDataBoundGrid(e) {
+         $('#QuizQuestionGrid .k-grid-content').attr("style", "height:auto");
+        var grid = $("#QuizQuestionGrid").data("kendoGrid");
+        var items = e.sender.items();
+        items.each(function (index) {
+            var dataItem = grid.dataItem(this);
+            if (dataItem.AttachedImage == null ) {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#DeleteImgBtn").addClass("k-state-disabled");
+            }
+        });
+    }
+
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+
+    function EditSelectedQuestion(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("editquestion","quiz")?quizId=" + dataItem.QuizId + "&questionId=" + dataItem.Id;
+    }
+    function DeleteSelectedQuestion(e) {
+        e.preventDefault();
+        displayProcessSpin();
+        if (confirm("Answer options and Students' Answers for this question will also be deleted and cannot be recovered. Are you sure to delete this question?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var grid = $("#QuizQuestionGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Delete_Question", "Quiz")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (result) {
+                    hideProcessSpin();
+                    grid.dataSource.read();
+                    grid.refresh();
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function openAnswerModal(quizId, questionId) {
+        location.href = "@Url.Action("editquestion","quiz")?quizId=" + quizId + "&questionId=" + questionId + "#answerSection";
+    }
+    function DeleteSelectedImage(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var grid = $("#QuizQuestionGrid").data("kendoGrid");
+        if (confirm("Are you sure to delete the image of the selected question?")) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("Delete_Image", "Quiz")',
+                data: { Id: dataItem.Id },
+                cache: false,
+                success: function (response) {
+                    grid.dataSource.read();
+                    grid.refresh();
+                    displaySuccess("Deleted Successfully!");
+                }
+            });
+          } else {
+            return false;
+        }
+    }
+</script>

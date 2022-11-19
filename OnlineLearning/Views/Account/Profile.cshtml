@@ -1,0 +1,80 @@
+﻿@model OnlineLearning.Models.UserViewModel
+@{
+    ViewBag.Title = "User Profile";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<div class="row w3-padding-16">
+    <div class="w3-card w3-white w3-padding-16">
+        <div class="row text-center padding-0">
+            @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+        </div>
+        <div class="row w3-padding-24 mediumPaddingLeftRight">
+            <div class="col-md-4 col-sm-12 text-center">
+                <img src="~/UploadedFiles/@Model.ProfilePic" style="width:160px;">
+            </div>
+            <div class="col-md-8 col-sm-12">
+                <div class="row">
+                    <span class="bolder" style="font-size:20px;padding-right:5px">@Model.Name</span>
+                    @if (Model.OwnUserProfile == false)
+                    {
+                        <a class="button-indigo padding-5 small" href="@Url.Action("message","chat",new { Id = Model.Id})"><i class="glyphicon glyphicon-send"></i> Send Message</a>
+                    }
+                </div>
+                <div class="w3-padding-16">
+                    <p><i class="glyphicon glyphicon-question-sign"></i> <span class="mediumPaddingLeftRight">@Model.Role</span></p>
+                    <p><i class="glyphicon glyphicon-envelope"></i> <span class="mediumPaddingLeftRight"><a class="link bolder" href="mailto:@Model.Email">@Model.Email</a></span></p>
+                    @if (Model.Code != "")
+                    {
+                        <p><i class="fa fa-id-badge"></i> <span class="mediumPaddingLeftRight">@Model.Code</span></p>
+                    }
+                    @if (Model.Biography != "")
+                    {
+                        <h5>
+                            <i class="glyphicon glyphicon-info-sign"></i> <span class="mediumPaddingLeftRight">Biography :</span>
+                        </h5>
+                        <div class="row" style="overflow:hidden;text-overflow:ellipsis">
+                            @Html.Raw(Model.Biography)
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+@if (!User.IsInRole("Admin"))
+{
+    <div class="row">
+        <div class="row w3-white w3-card mediumPaddingLeftRight w3-padding-16">
+            <h3 class="text-indigo bolder">Course Channels</h3>
+            <div class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
+                @if (Model.CourseChannels.Count == 0)
+                {
+                    <div class="row smallPaddingTopBottom text-danger">
+                        No Record
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model.CourseChannels)
+                    {
+                        <div class="row smallPaddingTopBottom">
+                            <span class="text-indigo col-md-6">@item.Name</span>
+                            <span class="mediumPaddingLeftRight">by - @item.CreatorName</span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+     if ('@TempData["UpdatedSuccess"]' != null && '@TempData["UpdatedSuccess"]' != "") {
+        displaySuccess("@TempData["UpdatedSuccess"]");
+    }
+</script>

@@ -1,0 +1,30 @@
+﻿@model OnlineLearning.Models.QuizViewModels
+@{
+    ViewBag.Title = "Start Quiz";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var count = 1;
+}
+
+
+    <div class="row">
+        <div class="col-md-2 padding-0">
+            @foreach (var item in Model.QuestionList)
+            {
+                <span class="w3-padding w3-large w3-white" id="@item.Id">
+                    @count
+                </span>
+                count++;
+            }
+        </div>
+        <div class="col-md-10 padding-0">
+            @foreach (var item in Model.QuestionList)
+            {
+                <div class="row">
+                    <div class="w3-card w3-white padding-32">
+                        @item.Question
+                    </div>
+                </div>
+            }
+        </div>
+        
+    </div>

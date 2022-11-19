@@ -1,0 +1,176 @@
+﻿@using Microsoft.AspNet.Identity;
+@model OnlineLearning.Models.ChatViewModels
+@{
+    ViewBag.Title = "Send Message";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<div class="row">
+    <h4 class="text-indigo bolder mediumPaddingTopBottom smallPaddingLeftRight" style="background-color:#f0f0f5;margin-bottom:0px;">
+        <i class="fa fa-comment"></i> Chat 
+        <a class="link smallPaddingLeftRight" href="@Url.Action("index","chat")" style="font-size:14px">Search User</a>
+    </h4>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row">
+    <div class="col-md-12 w3-white small-card padding-0">
+        @if (Model.ChatChannelList.Count == 0)
+        {
+            <h4 class="text-center bolder text-danger ">
+                No Chat Record
+            </h4>
+            <div class="text-center ">
+                <img width='200' height='200' src='~/Assest/empty.png' />
+            </div>
+        }
+        else
+        {
+            <div class="col-md-3 padding-0 ">
+                @foreach (var item in Model.ChatChannelList)
+                {
+                    if (item.ChatReceiverId == Model.ReceiverId)
+                    {
+                        <div onclick="goToMessageWithReceiver('@item.ChatReceiverId')" class="row w3-padding-16 w3-hover-opacity pointer-cursor" style="background-color:#fafafa">
+                            <div class="padding-5">
+                                <img src="~/UploadedFiles/@item.ChatReceiverProfilePic" class="w3-circle" style="width:10%" /> @item.ChatReceiverName
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div onclick="goToMessageWithReceiver('@item.ChatReceiverId')" class="row w3-padding-16 w3-hover-opacity pointer-cursor">
+                            <div class="padding-5">
+                                <img src="~/UploadedFiles/@item.ChatReceiverProfilePic" class="w3-circle" style="width:10%" /> @item.ChatReceiverName
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="col-md-9 w3-border-left">
+                <div class="row text-center">
+                    <div class="col-md-12 row">
+                        @if (Model.ChannelId != null && Model.ChannelId != Guid.Empty)
+                        {
+                            <a class="link col-md-3 col-xs-12 text-left" href="@Url.Action("deletechat","chat",new { Id = Model.ChannelId})">Delete Chat</a>
+                            <span class="text-indigo text-center col-xs-12 bolder col-md-6" style="font-size:20px;">@Html.DisplayFor(m => m.ReceiverName)</span>
+                            <a class="link col-md-3 text-right col-xs-12" href="@Url.Action("clearchathistory","chat",new { Id = Model.ChannelId})">Clear Chat History</a>
+                        }
+                        else
+                        {
+                            <span class="text-indigo text-center bolder" style="font-size:20px;">@Html.DisplayFor(m => m.ReceiverName)</span>
+                        }
+                    </div>
+                </div>
+                <div id="discussion" style="max-height:500px;overflow-y:scroll">
+                    @foreach (var item in Model.ChatWithReceiver)
+                    {
+                        //put on the right
+                        if (Model.CurrentUserId == item.SenderId)
+                        {
+                            <div class="row">
+                                <div class="col-md-6 col-xs-12 w3-right">
+                                    <div class="padding-5 w3-border" style="background-color:#f2f4ea">
+                                        <p class="small bold">@item.SenderName</p>
+                                        <p style="overflow-wrap:break-word;">@item.Message</p>
+                                        <p class="w3-opacity text-right small">@item.SentTime</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            //put on the left
+                            <div class="row">
+                                <div class="col-md-6 col-xs-12">
+                                    <div class="padding-5 w3-border" style="background-color:#f3f3f5">
+                                        <p class="small bold">@item.SenderName</p>
+                                        <p class="row" style="overflow-wrap:break-word;">@item.Message</p>
+                                        <p class="w3-opacity text-right small">@item.SentTime</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+
+                <div class="row w3-padding-16" style="margin:0px">
+                    <div class="row w3-border-top smallPaddingTopBottom">
+                        <div class="col-md-12 padding-0" style="margin: 0px">
+                            <input type="hidden" id="senderid" />
+                            <input type="hidden" id="receiverid" />
+                            <input type="hidden" id="sendername" />
+                            <div class="col-md-10">
+                                @Html.TextArea("Message", new { rows = 3, @class = "width100 k-textbox", @style="resize:vertical",
+                               @placeholder = "Type your message here", @id = "message" })
+                            </div>
+                            <div class="col-md-2 smallPaddingLeftRight">
+                                <button id="sendmessage" type="button" class="btn button-indigo">Send <i class="glyphicon glyphicon-send "></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+<!--SignalR script to update the chat page and send messages.-->
+<script>
+    if ('@TempData["DeleteChatSuccess"]' != null && '@TempData["DeleteChatSuccess"]' != "") {
+         displaySuccess("'@TempData["DeleteChatSuccess"]'");
+    }
+       if ('@TempData["DeleteChatHistorySuccess"]' != null && '@TempData["DeleteChatHistorySuccess"]' != "") {
+         displaySuccess("'@TempData["DeleteChatHistorySuccess"]'");
+    }
+
+    if ('@TempData["DeleteChatFailed"]' != null && '@TempData["DeleteChatFailed"]' != "") {
+         displayError("'@TempData["DeleteChatFailed"]'");
+    }
+    
+        $(function () {
+            // Reference the auto-generated proxy for the hub.
+            var chat = $.connection.chatHub;
+            var userid = '@User.Identity.GetUserId()';
+            // Create a function that the hub can call back to display messages.
+            chat.client.addNewMessageToPage = function (senderid,sendername, message, senttime) {
+                // Add the message to the page.
+                if (userid == senderid) {
+                    $('#discussion').append('<div class="row"><div class="col-md-6 w3-right"><div class="padding-5 w3-border" style="background-color:#f2f4ea"><p class="small bold">' + htmlEncode(sendername) + '</p><p>' + htmlEncode(message) + '</p><p class="w3-opacity text-right small">' + htmlEncode(senttime) + '</p></div></div></div>');
+                    $('#discussion').scrollTop($('#discussion')[0].scrollHeight);
+                } else {
+                    //if current page is dispalying chat with the sender, then only append the sender's message to current page
+                    if (sendername == '@Model.ReceiverName') {
+                         $('#discussion').append('<div class="row"><div class="col-md-6"><div class="padding-5 w3-border" style="background-color:#f3f3f5"><p class="small bold">'+htmlEncode(sendername)+'</p><p>' + htmlEncode(message) + '</p><p class="w3-opacity text-right small">' + htmlEncode(senttime) + '</p></div></div></div>');
+                        $('#discussion').scrollTop($('#discussion')[0].scrollHeight);
+                    }
+                }
+            };
+            var input = document.getElementById("message");
+            // Execute a function when the user releases a key on the keyboard
+            input.addEventListener("keyup", function(event) {
+              // Number 13 is the "Enter" key on the keyboard
+              if (event.keyCode === 13) {
+                // Cancel the default action, if needed
+                event.preventDefault();
+                // Trigger the button element with a click
+                document.getElementById("sendmessage").click();
+              }
+            });
+            $('#senderid').val('@Model.SenderId');
+            $('#receiverid').val('@Model.ReceiverId');
+            $('#sendername').val('@Model.SenderName');
+            
+        });
+        // This optional function html-encodes messages for display in the page.
+        function htmlEncode(value) {
+            var encodedValue = $('<div />').text(value).html();
+            return encodedValue;
+    }
+    function goToMessageWithReceiver(receiverid) {
+        location.href = "@Url.Action("message","chat",new { Id = ""})" + "/"+receiverid;
+    }
+</script>

@@ -1,0 +1,244 @@
+﻿@{
+    ViewBag.Title = "Home";
+}
+<style>
+    .fa-rotate-30 {
+        -webkit-transform: rotate(30deg);
+        -ms-transform: rotate(30deg);
+        transform: rotate(30deg);
+    }
+
+    .fa-rotate-30-negative {
+        -webkit-transform: rotate(-30deg);
+        -ms-transform: rotate(-30deg);
+        transform: rotate(-30deg);
+    }
+
+    .text-green {
+        color: #579573;
+    }
+
+    .dark-purple-background {
+        background-color: #1b142b;
+        /*background-color:#201833 ;*/
+    }
+</style>
+
+<!--First Container-->
+<div id="firstContainer" class="row dark-purple-background" style="padding-top:170px;padding-bottom:170px;">
+    <div id="textDescTwo" class="col-md-8 text-center centerBlock">
+        <span id="watchVideoLink">
+            <i id="watchVideoLinkIcon" class="glyphicon glyphicon-play-circle text-indigo text-xlarge"></i>
+        </span>
+        <p class="text-medium">
+            <a class="text-button" href="https://www.youtube.com/playlist?list=PLQYdMEPYT7n5vsIl8oYiNp8ltvI-ipF4m" target="_blank">Watch Video Tutorial</a>
+            <span class="textButtonIcon text-green" style="display:none">>></span>
+        </p>
+        <i id="graduationCap" class="fa fa-graduation-cap fa-rotate-30 text-indigo w3-xxxlarge w3-left w3-hide-small" onmouseover="animateGraduationCap()" onmouseout="stopGraduationCap()"></i>
+        <!--To be changed Viewbag-->
+        <h2 class="text-large text-indigo bolder w3-animate-zoom" style="letter-spacing:-1px;">Learning with <span id="portalNameHome"></span></h2>
+        <p id="animateSecond" class="w3-text-white text-medium">
+            Enhance learning and learning process by various online activities and online materials.
+            Foster discussion among instructor and students.
+        </p>
+        <p class="w3-padding-16">
+            <a class="w3-animate-left button-indigo w3-round-large btn btn-lg" href="@Url.Action("login","account")">Log In Now</a>
+            <a class="w3-animate-right button-white w3-round-large btn btn-lg" href="@Url.Action("register","account")">Register and Wait for Approval</a>
+        </p>
+        <i id="laptop" class="fa fa-laptop fa-rotate-30-negative text-indigo w3-xxxlarge w3-right w3-hide-small" onmouseover="animateLaptop()" onmouseout="stopLaptop()"></i>
+    
+    </div>
+</div>
+<!--Second Container-->
+<div id="secondContainer" class="row " style="padding-top:150px;padding-bottom:150px;background-color:  #e9e9d8">
+    <h1 class="text-indigo bolder text-center">3 User Roles</h1>
+    <div id="userroleSection" class="row text-center slideanim">
+        <div class="col-sm-4">
+            <div class="thumbnail dark-purple-background padding-0">
+                <img src="~/Assest/instructor.png" alt="instructor" style="width:100%">
+                <h3 id="animateThird" class="text-gold bolder"><strong>Instructor</strong></h3>
+                <p class="w3-text-white">Create Courses, Upload Reading Materials, Give and Mark Assignments, Make Announcements, Create Discussion Thread, Enroll or Unenroll Students, Create Quiz Game</p>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="thumbnail dark-purple-background padding-0">
+                <img src="~/Assest/student.png" alt="student" style="width:100%">
+                <h3 class="text-gold bolder"><strong>Student</strong></h3>
+                <p class="w3-text-white">Enroll into a Course, Download Reading Materials, Submit Assignments, View Announcements, Participate in Discussion with Instructor and Coursemates, Play Quiz Game</p>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="thumbnail dark-purple-background padding-0">
+                <img src="~/Assest/admin.png" alt="admin" style="width:100%">
+                <h3 class="text-gold bolder"><strong>Admin</strong></h3>
+                <p class="w3-text-white">User Management (Add + Edit + Delete + Approve + Reject + Disable User Login + Reset Password for a User), Make Campus Announcement that all users can see</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- third container -->
+<div id="thirdContainer" class="row dark-purple-background mediumPaddingLeftRight" style="padding-top:150px;padding-bottom:150px;">
+    <div class="col-md-5 w3-hide-small text-center">
+        <img src="~/Assest/process.png" class="w3-round w3-image w3-opacity-min" alt="Table Setting" style="width:80%">
+    </div>
+    <div id="processContainer" class="col-md-7 w3-text-white">
+        <h1 class="text-indigo bolder">The Process</h1><br>
+        <h4>Instructor or Student register by themselves</h4>
+        <p class="w3-opacity-min">Share the registration link to the instructors or students and ask them to register by themselves</p><br>
+
+        <h4>Admin Approve or Reject the Registration Request</h4>
+        <p class="w3-opacity-min">Instructor or student will receive an email notification while the admin approve or reject the request</p><br>
+
+        <h4>Instructor Create a Course Channel</h4>
+        <p class="w3-opacity-min">Enter course channel name and description, manage the course channel, share enroll link with students</p><br>
+
+        <h4>Student Enroll into a Course Channel</h4>
+        <p class="w3-opacity-min">Student can search and view all the available course channels, as well as enroll into a course</p><br>
+
+        <h4>Instructor Upload Reading Materials, Give Assignments, and more...</h4>
+        <p id="animateFourth" class="w3-opacity-min">Instructor can upload reading materials in the form of audio, video, text, links, and files. Student can download all the materials.</p>
+    </div>
+</div>
+<!-- fourth container -->
+<div id="fourthContainer" class="row container-fluid text-center" style="padding-top:150px;padding-bottom:150px;background-color:#e9e9d8">
+    <h1 class="text-indigo bolder">Features</h1>
+    <h4>Everthing that is essential for teaching and learning</h4>
+    <br>
+    <div id="featureContainer" class="row">
+        <div class="row">
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-dashboard w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">dashboard</h4>
+                <p>Different dashboard showing interesting statistic for admins, instructors and students</p>
+            </div>
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-heart w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">personalization</h4>
+                <p>Choose your preferred background color (light theme or dark theme) in the setting page</p>
+            </div>
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-tasks w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">assignment</h4>
+                <p>Instructor give assignment > Student submit > Instructor give mark > Student view mark</p>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-bullhorn w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">announcement</h4>
+                <p>Instructor share video conference invitation link (e.g. ZOOM / Google Hangout link)</p>
+            </div>
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-comment w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">discussion</h4>
+                <p>Instructor or student can create discussion thread > discuss everthing about the course together</p>
+            </div>
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-education w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">student</h4>
+                <p>Instructor can manage students in their courses, enroll or unenroll a student</p>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-play w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">quiz</h4>
+                <p>Simple and interesting MCQ quiz game for students to play that includes sound effect.</p>
+            </div>
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-th-large w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">chapter</h4>
+                <p>Instructor create chapters in the courses and upload reading materials in each chapter</p>
+            </div>
+            <div class="col-sm-4">
+                <span class="glyphicon glyphicon-resize-full w3-xxxlarge text-indigo"></span>
+                <h4 class="text-uppercase">responsive</h4>
+                <p>Responsive bootstrap 3 design, user friendly in laptop, tab, and mobile phone</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+     //load portal name
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+            $.ajax({
+                url: '@Url.Action("GetAppSettingsValue", "GeneralFunction")',
+                type: "GET",
+                data: {key: "portalName"},
+                success: function (response) {
+                    $("#portalName").text(response);
+                }
+            });
+             var animateSecond = $('#animateSecond').waypoint({
+                handler: function (direction) {
+                    $('#userroleSection').addClass('w3-animate-bottom');
+                }
+             });
+            var animateThird = $('#animateThird').waypoint({
+                handler: function (direction) {
+                    $('#processContainer').addClass('w3-animate-left');
+                }
+             });
+              var animateFourth = $('#animateFourth').waypoint({
+                handler: function (direction) {
+                    $('#featureContainer').addClass('w3-animate-bottom');
+                }
+             });
+
+            
+            
+        });
+
+    function animateGraduationCap() {
+        $("#graduationCap").addClass("fa-rotate-30-negative");
+    }
+
+    function stopGraduationCap() {
+        $("#graduationCap").removeClass("fa-rotate-30-negative");
+    }
+
+    function animateLaptop() {
+        $("#laptop").removeClass("fa-rotate-30-negative");
+        $("#laptop").addClass("fa-rotate-30");
+    }
+
+    function stopLaptop() {
+        $("#laptop").removeClass("fa-rotate-30");
+        $("#laptop").addClass("fa-rotate-30-negative");
+    }
+
+    
+
+    $(window).scroll(function() {
+        $(".slideanim").each(function(){
+          var pos = $(this).offset().top;
+
+          var winTop = $(window).scrollTop();
+            if (pos < winTop + 600) {
+              $(this).addClass("slide");
+            }
+        });
+      });
+    $("#watchVideoLink").hover(function () {
+        $("#watchVideoLinkIcon").addClass("w3-spin");
+
+    });
+    $("#watchVideoLink").mouseout(function () {
+        $("#watchVideoLinkIcon").removeClass("w3-spin");
+
+    });
+    $(".text-button").hover(function () {
+        $(".textButtonIcon").show();
+        $(".textButtonIcon").addClass("text-darkcyan");
+    })
+    $(".text-button").mouseout(function () {
+        $(".textButtonIcon").hide();
+        $(".textButtonIcon").removeClass("text-darkcyan");
+
+    });
+</script>

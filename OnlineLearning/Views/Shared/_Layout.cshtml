@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="e learning,online learning,learning management system,school,e class,school management system,online class,e class">
+    <meta name="author" content="jycoding">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="portalTitle"></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="icon" href="~/Assest/logo.png" type="image/png">
+    @Styles.Render("~/Content/kendo/css")
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/signalr")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/custom")
+    @Scripts.Render("~/bundles/pako")
+    @Scripts.Render("~/bundles/waypoint")
+    <script>
+        //load portal name
+        $(document).ready(function () {
+            $.ajax({
+                url: '@Url.Action("GetAppSettingsValue", "GeneralFunction")',
+                type: "GET",
+                data: {key: "portalName"},
+                success: function (response) {
+                    $("#portalName").text(response);
+                    $("#portalNameHome").text(response);
+                    $("#portalTitle").text('@ViewBag.Title - ' + response);
+                }
+            });
+            $.ajax({
+                url: '@Url.Action("GetUserBackgroundSetting", "GeneralFunction")',
+                type: "GET",
+                success: function (response) {
+                    if (response == 'Dark') {
+                        $('html, body').css("background-color", "#080320");
+                    }
+                    if (response == 'Light') {
+                        $('html, body').css("background-color", "#edf7f7");
+                    }
+                }
+            });
+             $.ajax({
+                url: '@Url.Action("GetLoginUser", "GeneralFunction")',
+                type: "GET",
+                success: function (response) {
+                    $("#myProfileLink").attr("href", "/account/profile/" + response.Id);
+                    $("#nameLink").text(response.Name);
+                    $("#profileImg").attr("src", "/UploadedFiles/" + response.ProfilePic);
+                }
+            });
+        });
+        // Toggle between showing and hiding the sidebar
+        function w3_open() {
+            if (mySidebar.style.display === 'block') {
+                $('#mySidebar').hide();
+                $('#myOverlay').hide();
+            } else {
+                $('#mySidebar').show();
+                $('#myOverlay').show();
+            }
+        }
+        // Close the sidebar with the close button
+        function w3_close() {
+            $('#mySidebar').hide();
+            $('#myOverlay').hide();
+        }
+    </script>
+</head>
+<body class="background-indigo-black">
+
+    @Html.Partial("~/Views/Shared/_TopNavigationBar.cshtml")
+    <div id="topSection"></div>
+
+    <div id="bodyContainer" style="margin-top:50px;">
+        @RenderBody()
+        <footer class="dark-purple-background w3-padding-64 text-center w3-border-top" style="border-color:#e9e9d8;">
+            <a href="#topSection" data-toggle="tooltip" data-placement="top" title="To Top">
+                <span class="glyphicon glyphicon-chevron-up"></span>
+            </a>
+            
+            <p class="text-center w3-text-white"><i class="glyphicon glyphicon-copyright-mark"></i> Created by Jude & Alen</p>
+           
+        </footer>
+    </div>
+
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+

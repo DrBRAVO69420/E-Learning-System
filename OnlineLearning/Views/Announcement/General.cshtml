@@ -1,0 +1,169 @@
+﻿@model OnlineLearning.Models.AnnouncementViewModel
+@{
+    ViewBag.Title = "Manage Announcements";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<div class="row">
+    <div class="row">
+        <div class="w3-panel sectionHeading">
+            <h3 class="text-indigo bolder">
+                <i class="glyphicon glyphicon-bullhorn"></i> Manage Announcements
+            </h3>
+        </div>
+    </div>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top center-block" style="width:100%;">
+    <div class="w3-card w3-white smallPaddingLeftRight">
+        <div class="row">
+            @Html.Partial("~/Views/Shared/_SearchBarAndResetButton.cshtml", new ViewDataDictionary { { "GridId", "GeneralAnnouncementGrid" }, { "SearchPlaceHolder", "Search Title / Details / Updated By" } })
+        </div>
+        @(Html.Kendo().Grid<OnlineLearning.Models.AnnouncementViewModel>
+        ()
+        .Name("GeneralAnnouncementGrid")
+        .Columns(columns =>
+        {
+            columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Announcements").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+            columns.Bound(c => c.Id).Hidden();
+            columns.Bound(c => c.TitleText).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" }).Media("(min-width: 420px)");
+            columns.Bound(c => c.Details).Encoded(false).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" }).Media("(min-width: 420px)");
+            columns.Bound(c => c.AdminName).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" }).Media("(min-width: 420px)");
+            columns.Bound(c => c.strLastUpdate).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" }).Media("(min-width: 420px)");
+            columns.Command(command =>
+            {
+                command.Custom("Edit").IconClass(" ").Text("<i class='glyphicon glyphicon-pencil' style='font-size:18px'></i>").Click("EditSelectedAnnouncement").HtmlAttributes(new { style = "color:blue", title = "Edit" });
+                command.Custom("Destroy").IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").Click("DeleteSelectedAnnouncement");
+                command.Custom("ViewDetails").Text("<i class='glyphicon glyphicon-eye-open detail-btn' style='font-size:18px'></i>").Click("showDetails").HtmlAttributes(new { id="viewDetailBtn" , @class="w3-hide-medium w3-hide-large"});
+
+            }).Width(150).Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+        })
+.ToolBar(toolbar =>
+{
+    toolbar.Custom().IconClass("k-icon k-i-plus").Text("Add New Announcement").Action("editgeneral", "announcement", new { Id = "" }).HtmlAttributes(new { @class = "button-indigo" });
+})
+.Pageable()
+.Sortable()
+.Resizable(resize => resize.Columns(true))
+.Scrollable()
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators
+.ForString(str => str.Clear()
+.Contains("Contains")
+.IsEqualTo("Is equal to")
+)
+.ForDate(dt => dt.Clear()
+.IsEqualTo("Is equal to")
+.IsGreaterThan("Is after")
+.IsLessThan("Is before")
+)
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Events(events => events.Error("error_handler")/*.Sync("sync_handler")*/)
+.Model(model =>
+{
+    model.Id(m => m.Id);
+})
+.Read(read => read.Action("Read_CampusAnnouncement", "Announcement"))
+.Events(e => e.RequestEnd("onRequestEnd"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('GeneralAnnouncementGrid')"))
+        )
+    </div>
+
+</div>
+
+<!-- ---------------------- View Detail Window ---------------------- -->
+@(Html.Kendo().Window().Name("DetailsWindow")
+       .Title("Announcement Details")
+       .Visible(false)
+       .Modal(true)
+       .Draggable(true)
+       .Resizable(r => r.Enabled(true))
+       .Width(370)
+)
+<!-- ---------------------- Detail Window's Content Template ---------------------- -->
+<script type="text/x-kendo-template" id="detailsTemplate">
+    <div id="details-container">
+        <h4 class="w3-large">#= TitleText #</h4>
+        <div class="small w3-opacity">
+            Updated by #= AdminName # , On #=kendo.toString(LastUpdate,'yyyy-MM-dd,  hh:mm tt')#
+        </div>
+        <div class="mediumPaddingTopBottom">
+            #= Details #
+        </div>
+    </div>
+</script>
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">#=data.TitleText#</p>   
+</script>
+
+
+<script>
+    if ('@TempData["AnnouncementUpdated"]' != null && '@TempData["AnnouncementUpdated"]' != "") {
+        displaySuccess("'@TempData["AnnouncementUpdated"]'");
+    }
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    var detailsTemplate = kendo.template($("#detailsTemplate").html());
+    $("#GeneralAnnouncementGrid").kendoTooltip({
+            filter: ".k-grid-Edit",
+            position: "auto",
+            content: "Edit"       
+    });
+    $("#GeneralAnnouncementGrid").kendoTooltip({
+            filter: ".k-grid-Destroy",
+            position: "auto",
+            content: "Delete"       
+    });
+    $("#GeneralAnnouncementGrid").kendoTooltip({
+            filter: ".k-grid-ViewDetails",
+            position: "auto",
+            content: "View Details"       
+    });
+     function showDetails(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var wnd = $("#DetailsWindow").data("kendoWindow");
+        wnd.content(detailsTemplate(dataItem));
+        adjustWindowSize(wnd);
+        wnd.center().open();
+    }
+
+    function EditSelectedAnnouncement(e) {
+         e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("editgeneral","announcement")/" + dataItem.Id;
+    }
+    function DeleteSelectedAnnouncement(e) {
+        e.preventDefault();
+        if (confirm("Are you sure to delete the announcement?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var grid = $("#GeneralAnnouncementGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Delete_Announcement", "Announcement")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (result) {
+                    grid.dataSource.read();
+                    grid.refresh();
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+</script>

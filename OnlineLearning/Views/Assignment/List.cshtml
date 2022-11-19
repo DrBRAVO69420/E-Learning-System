@@ -1,0 +1,241 @@
+﻿@model OnlineLearning.Models.AssignmentViewModels
+@{
+    ViewBag.Title = "Assignment List";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var teacherUser = false;
+    if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+    {
+        teacherUser = true;
+    }
+}
+
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        <i class="fa fa-list smallPaddingLeftRight"></i> Assignment List
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row w3-padding-16">
+    <div class="w3-white w3-card smallPaddingLeftRight">
+        <div class="row">
+            @Html.Partial("~/Views/Shared/_SearchBarAndResetButton.cshtml", new ViewDataDictionary { { "GridId", "AssignmentGrid" }, { "SearchPlaceHolder", "Search Title" } })
+        </div>
+        <div class="row">
+            @(Html.Kendo().Grid<OnlineLearning.Models.AssignmentViewModels>()
+                    .Name("AssignmentGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Assignments").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                        columns.Bound(c => c.Id).Hidden();
+                        columns.Bound(c => c.AssignmentTitle).ClientTemplate("<div class='row smallPaddingLeftRight'><h4 class='padding-0' style='margin-bottom:0px'><a class='link bolder' href='" +
+                            Url.Action("detail", "assignment") +
+                            "/#=Id#' >#=AssignmentTitle#</a></h4><span class='w3-opacity-min'>#=Type# Assignment</span></div>")
+                        .HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.FileName).ClientTemplate("<i class='glyphicon glyphicon-file w3-text-orange'></i> #if(data.FileName == null){# <span class='bolder text-warning'>No File</span> #}else{#  <a class='link bolder' href='/UploadedFiles/#=FileName#' target='_blank'>#=FileName#</a> #}#").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.strDueDate).Filterable(f => f.Enabled(false)).ClientTemplate("#if(data.strDueDate == null){# <span class='bolder text-warning'>No Due Date</span> #}else{# <div>Due on <b>#=strDueDate#</b></div>#}#").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        if (!teacherUser)
+                        {
+                            columns.Bound(c => c.SubmissionStatus).Filterable(f => f.Enabled(false)).ClientTemplate("#if(data.SubmissionStatus == 'Submitted'){# <span class='bolder label label-success text-success'>#=SubmissionStatus#</span> #}else{# <span class='bolder label label-warning'>#=SubmissionStatus#</span>#}#").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        }
+                        columns.Command(command =>
+                        {
+                            if (teacherUser)
+                            {
+                                command.Custom("Edit").IconClass(" ").Text("<i class='glyphicon glyphicon-edit edit-btn' style='font-size:18px'></i>").Click("EditSelectedAssignment").HtmlAttributes(new { title = "Edit Assignment" });
+                                command.Custom("RemoveDueDate").IconClass(" ").Text("<i class='glyphicon glyphicon-calendar disable-btn' style='font-size:18px'></i>").Click("RemoveDueDate").HtmlAttributes(new { title = "Remove Due Date" });
+                                command.Custom("Destroy").IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").Click("DeleteSelectedAssignment").HtmlAttributes(new { title = "Delete Assignment" });
+                                command.Custom("ManageGroup").IconClass(" ").Text("<i class='fa fa-users password-btn' style='font-size:18px'></i>").Click("ManageGroupMembers").HtmlAttributes(new { id = "ManageGroupBtn", title = "Manage Group Members" });
+                                command.Custom("Submission").IconClass(" ").Text("<i class='glyphicon glyphicon-ok w3-text-green' style='font-size:18px'></i>").Click("ManageSubmission").HtmlAttributes(new { title = "Manage Submission" });
+
+                            }
+                            else
+                            {
+                                command.Custom("ManageGroup").IconClass(" ").Text("<i class='fa fa-users edit-btn' style='font-size:18px'></i>").Click("ManageGroupMembers").HtmlAttributes(new { id = "ManageGroupBtn" , title = "Manage Group Members"});
+                                command.Custom("Detail").IconClass(" ").Text("<i class='fa fa-info-circle password-btn' style='font-size:18px'></i>").Click("SubmitAssignment").HtmlAttributes(new { title = "Assignment Detail" });
+                            }
+                        })
+                        .Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+                    })
+.ToolBar(toolbar =>
+{
+    if (teacherUser)
+    {
+        toolbar.Custom().Name("addAssignmentBtn").Action("editassignment", "assignment", new { courseChannelId = Model.CourseChannelId }).IconClass("k-icon k-i-plus").Text("Add Assignment").HtmlAttributes(new { @id = "addAssignmentBtn", @class = "button-indigo" });
+    }
+})
+.Editable(editable => editable.DisplayDeleteConfirmation("Are you sure to delete this record?"))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_Assignment", "Assignment", new { CourseChannelId = Model.CourseChannelId }))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("onDataBoundGrid"))
+            )
+        </div>
+    </div>
+
+
+</div>
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">
+        <div class='row smallPaddingLeftRight'><h4 class='padding-0' style='margin-bottom:0px'><a class='link bolder' href='@Url.Action("detail","assignment")/#=Id#'>#=data.AssignmentTitle#</a></h4><span class='w3-opacity-min'>#=data.Type# Assignment</span></div>
+    </p>
+    @*<p class="col-template-val">#=data.Type#</p>*@
+    <p class="col-template-val">
+        <i class='glyphicon glyphicon-file w3-text-orange'></i> #if(data.FileName == null){# <span class='bolder text-warning'>No File</span> #}else{#  <a class='link bolder' href='/UploadedFiles/#=FileName#' target='_blank'>#=FileName#</a> #}#
+    </p>
+    <p class="col-template-val">
+        #if(data.strDueDate == null){# <span class='bolder text-warning'>No Due Date</span> #}else{# <div>Due on <b>#=strDueDate#</b></div>#}#
+    </p>
+    @if (!teacherUser)
+    {
+    <p class="col-template-val">
+        #if(data.SubmissionStatus == 'Submitted'){# <span class='bolder label label-success text-success'>#=SubmissionStatus#</span> #}else{# <span class="bolder label label-warning">#=SubmissionStatus#</span>#}#
+    </p>
+    }
+
+</script>
+
+<script>  
+    if ('@TempData["AssignmentUpdated"]' != null && '@TempData["AssignmentUpdated"]' != "") {
+        displaySuccess("'@TempData["AssignmentUpdated"]'");
+    }
+    $("#AssignmentGrid").kendoTooltip({
+        filter: ".k-grid-Edit",
+        position: "auto",
+        content: "Edit Assignment"       
+    });
+    $("#AssignmentGrid").kendoTooltip({
+        filter: ".k-grid-RemoveDueDate",
+        position: "auto",
+        content: "Remove Due Date"       
+    });
+     $("#AssignmentGrid").kendoTooltip({
+        filter: ".k-grid-Destroy",
+        position: "auto",
+        content: "Delete Assignment"       
+     });
+     $("#AssignmentGrid").kendoTooltip({
+        filter: ".k-grid-ManageGroup",
+        position: "auto",
+        content: "Manage Group Members"       
+     });
+      $("#AssignmentGrid").kendoTooltip({
+        filter: ".k-grid-Submission",
+        position: "auto",
+        content: "Manage Submission"       
+      });
+      $("#AssignmentGrid").kendoTooltip({
+        filter: ".k-grid-Detail",
+        position: "auto",
+        content: "View Detail"       
+    });
+    function onDataBoundGrid(e) {      
+        $('[data-toggle="tooltip"]').tooltip();
+         $('#AssignmentGrid .k-grid-content').attr("style", "height:auto");
+        var grid = $("#AssignmentGrid").data("kendoGrid");
+        var items = e.sender.items();
+        items.each(function (index) {
+            var dataItem = grid.dataItem(this);
+            if (dataItem.Type != "Group") {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#ManageGroupBtn").addClass("k-state-disabled");
+            }
+        });
+    }
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    function EditSelectedAssignment(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("editassignment","assignment")?courseChannelId=" + dataItem.CourseChannelId + "&assignmentId=" + dataItem.Id;
+    }
+    function ManageGroupMembers(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("managegroupmembers","assignment")/" + dataItem.Id;
+    }
+    function SubmitAssignment(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("detail","assignment")/" + dataItem.Id;
+    }
+
+    function RemoveDueDate(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        $.ajax({
+            url: '@Url.Action("RemoveDueDate", "Assignment")',
+            type: "GET",
+            data: {Id: dataItem.Id},
+            success: function (error) {
+                if (error == "") {
+                    $('#AssignmentGrid').data('kendoGrid').dataSource.read();
+                    $('#AssignmentGrid').data('kendoGrid').refresh();
+                    displaySuccess("Removed Successfully!");
+                } else {
+                    displayError(error);
+                }
+            }
+        });
+    }
+    function DeleteSelectedAssignment(e) {
+        e.preventDefault();
+        if (confirm("Are you sure to delete the assignment?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var grid = $("#AssignmentGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Delete_Assignment", "Assignment")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (result) {
+                    grid.dataSource.read();
+                    grid.refresh();
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function ManageSubmission(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("detail","assignment")/" + dataItem.Id;
+    }
+
+    function AssignmentGridFilterType(e) {
+        $.ajax({
+            url: '/Assignment/GetAssignmentTypeOption',
+            type: "GET",
+            success: function (result) {
+                e.kendoDropDownList({
+                    optionLabel: '- Select Type -',
+                    dataTextField: 'Text',
+                    dataValueField: 'Value',
+                    filter: "contains",
+                    dataSource: result
+                });
+            }
+        });
+}
+</script>

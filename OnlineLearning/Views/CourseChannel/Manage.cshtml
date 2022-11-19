@@ -1,0 +1,274 @@
+﻿@model OnlineLearning.Models.CourseChannelViewModel
+@{
+    ViewBag.Title = Model.Name + " Course Channel Management";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+
+@if (TempData["CourseChannelCreated"] != null)
+{
+    @Html.Partial("~/Views/Shared/_CourseChannelCreatedModal.cshtml") <!--displayed when _Course Channel first Created-->
+}
+
+<!-- ---------------------------- Description ---------------------------- -->
+<div class="row smallPaddingTopBottom">
+    <div class="small-card w3-padding-16 mediumPaddingLeftRight w3-white">
+        <h4 class="text-indigo bolder">
+            Description
+            @if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+            {
+                <i class="glyphicon glyphicon-edit link bolder pointer-cursor" onclick="showEditForm()"></i>
+            }
+        </h4>
+        <p>
+            @Model.Description
+        </p>
+    </div>
+</div>
+<div id="editFormModal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-zoom">
+        <div class="w3-container w3-display-container background-indigo w3-text-white w3-medium">
+            <span id="modalClose" onclick="document.getElementById('editFormModal').style.display='none'" class="w3-button w3-hover-indigo w3-display-topright w3-large">x</span>
+            <h3 id="modalHeading" class="w3-large" style="padding-top:8px;padding-bottom:8px">Edit Course Channel Name and Description</h3>
+        </div>
+        <div class="w3-container w3-padding-16" id="modelContent">
+            @Html.Partial("~/Views/CourseChannel/_EditCourseChannelForm.cshtml")
+        </div>
+    </div>
+</div>
+<!-- ---------------------------- Alert ---------------------------- -->
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row smallPaddingTopBottom">
+    <div class="w3-panel sectionHeading">
+        <h4 class="bolder text-indigo"><i class="glyphicon glyphicon-bullhorn "></i> Latest Announcement</h4>
+    </div>
+    <div class="w3-white padding-10">
+        <h5 class="text-indigo bold">@Model.LastestAnnouncement.Title</h5>
+        <div class="small w3-opacity">
+            Announced On- @Html.DisplayFor(m => m.LastestAnnouncement.CreatedOn)
+        </div>
+        <div class="smallPaddingTopBottom" style="overflow:hidden;text-overflow:ellipsis">
+            @Html.Raw(Model.LastestAnnouncement.Detail)
+        </div>
+    </div>
+</div>
+<!-- ---------------------------- Add Chapter Part ---------------------------- -->
+@if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+{
+    <div class="row smallPaddingTopBottom small-margin-top">
+        <div class="w3-panel sectionHeading">
+            <h4 class="bolder text-indigo">Add a Chapter Section</h4>
+        </div>
+
+        @using (Html.BeginForm("CreateChapter", "CourseChannel", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            <div class="col-md-10 padding-0">
+                @Html.Kendo().TextBoxFor(m => m.ChapterName).HtmlAttributes(new { @placeholder = "Enter Chapter Title" })
+            </div>
+            <div class="col-md-2 smallPaddingLeftRight">
+                <button class="button-indigo width100" type="submit"><i class="glyphicon glyphicon-plus"></i> Add</button>
+            </div>
+        }
+    </div>
+}
+
+
+<!-- ---------------------------- Chapter Grid ---------------------------- -->
+<div class="row" style="padding-bottom:30px">
+    @foreach (var chapter in Model.ChapterList)
+    {
+        <div class="row mediumPaddingTopBottom">
+            <div class="w3-card w3-padding-16 mediumPaddingLeftRight w3-white col-md-12">
+                <h4 class="text-indigo bolder col-md-12" style="margin:0px">
+                    <span style="padding-right:5px">@chapter.ChapterTitle</span>
+                </h4>
+                @if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+                {
+                    <div class="row text-center">
+                        <a class="forTooltips button-indigo padding-5 small" href="@Url.Action("editchapter","chapter",new { Id =chapter.Id })" data-toggle="tooltip" data-placement="top" title="Edit Chapter" style="cursor: pointer "><i class="glyphicon glyphicon-edit w3-text-green"></i> Edit/Add Chapter Materials</a>
+                        <a class="forTooltips button-indigo padding-5 small" href="#" onclick="DeleteChapter('@chapter.Id')" data-toggle="tooltip" data-placement="top" title="Delete Chapter" style="cursor: pointer "><i class="glyphicon glyphicon-trash" style="color:HotPink"></i> Delete Chapter</a>
+                    </div>
+                }
+                <div class="col-md-6">
+                    <div class="row w3-border-bottom mediumPaddingTopBottom">
+                        <span class="bolder w3-large"><i class="fa fa-folder w3-text-orange"></i> File Materials:</span>
+                    </div>
+                    <div class="row mediumPaddingLeftRight">
+                        @foreach (var file in chapter.FileList)
+                        {
+                            if (file.FileName.Contains("ppt") || file.FileName.Contains("pptx"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <i class="fa fa-file-powerpoint-o bolder w3-text-orange text-medium"></i> <a class="link bolder smallPaddingLeftRight" href="~/UploadedFiles/@file.FileName" target='_blank'>@file.FileName</a>
+                                </div>
+                            }
+                            else if (file.FileName.Contains("doc") || file.FileName.Contains("docx"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <i class="	fa fa-file-word-o bolder w3-text-orange text-medium"></i> <a class="link bolder smallPaddingLeftRight" href="~/UploadedFiles/@file.FileName" target='_blank'>@file.FileName</a>
+                                </div>
+                            }
+                            else if (file.FileName.Contains("pdf"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <i class="fa fa-file-pdf-o bolder w3-text-orange text-medium"></i> <a class="link bolder smallPaddingLeftRight" href="~/UploadedFiles/@file.FileName" target='_blank'>@file.FileName</a>
+
+                                </div>
+                            }
+                            else if (file.FileName.Contains("zip") || file.FileName.Contains("rar"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <i class="fa fa-file-zip-o bolder w3-text-orange text-medium"></i> <a class="link bolder smallPaddingLeftRight" href="~/UploadedFiles/@file.FileName" target='_blank'>@file.FileName</a>
+                                </div>
+                            }
+                            else if (file.FileName.Contains("xlsx") || file.FileName.Contains("csv"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <i class="fa fa-file-excel-o bolder w3-text-orange text-medium"></i> <a class="link bolder smallPaddingLeftRight" href="~/UploadedFiles/@file.FileName" target='_blank'>@file.FileName</a>
+                                </div>
+                            }
+                            else if (file.FileName.Contains("mp4"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <div class="embed-responsive embed-responsive-16by9">
+                                        <video controls>
+                                            <source src="/UploadedFiles/@file.FileName" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                </div>
+                            }
+                            else if (file.FileName.Contains("mp3"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <audio controls>
+                                        <source src="/UploadedFiles/@file.FileName" type="audio/mpeg">
+                                        Your browser does not support the audio tag.
+                                    </audio>
+                                </div>
+                            }
+                            else if (file.FileName.Contains("wav"))
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <audio controls>
+                                        <source src="/UploadedFiles/@file.FileName" type="audio/wav">
+                                        Your browser does not support the audio tag.
+                                    </audio>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="row smallPaddingTopBottom">
+                                    <a class="link bolder smallPaddingLeftRight" href="~/UploadedFiles/@file.FileName" target='_blank'>@file.FileName</a>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+
+
+                <div class="col-md-6">
+                    <div class="row w3-border-bottom mediumPaddingTopBottom">
+                        <span class="bolder w3-large"><i class="glyphicon glyphicon-info-sign w3-text-blue"></i> Text / Link Materials:</span>
+                    </div>
+                    <div class="row">
+                        @foreach (var text in chapter.TextList)
+                        {
+                            <div class="row" style="overflow:hidden;text-overflow:ellipsis">
+                                @Html.Raw(text.Detail)
+                            </div>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    $('#courseChannelCreatedModal').modal('show');
+
+    if ('@TempData["ModalStateError"]' != null && '@TempData["ModalStateError"]' != "") {
+        displayError("@TempData["ModalStateError"]");
+    }
+    if ('@TempData["ChapterCreated"]' != null && '@TempData["ChapterCreated"]' != "") {
+        displaySuccess("'@TempData["ChapterCreated"]'");
+    }
+    if ('@TempData["EditChapterSuccess"]' != null && '@TempData["EditChapterSuccess"]' != "") {
+        displaySuccess("'@TempData["EditChapterSuccess"]'");
+    }
+    if ('@TempData["FileUploaded"]' != null && '@TempData["FileUploaded"]' != "") {
+        displaySuccess("'@TempData["FileUploaded"]'");
+    }
+     if ('@TempData["NameEmpty"]' != null && '@TempData["NameEmpty"]' != "") {
+        displayError("@TempData["NameEmpty"]");
+    }
+    if ('@TempData["DescriptionEmpty"]' != null && '@TempData["DescriptionEmpty"]' != "") {
+        displayError("@TempData["DescriptionEmpty"]");
+    }
+    if ('@TempData["AllEmpty"]' != null && '@TempData["AllEmpty"]' != "") {
+        displayError("@TempData["AllEmpty"]");
+    }
+     if ('@TempData["CourseChannelUpdated"]' != null && '@TempData["CourseChannelUpdated"]' != "") {
+        displaySuccess("'@TempData["CourseChannelUpdated"]'");
+    }
+    
+
+    // -------------------------------- Add Chapter --------------------------------
+    function addChapter() {
+        var chapterName = $("#ChapterName").val();
+        if (chapterName == "") {
+            displayError("Please enter a Chapter Title");
+        }
+        else {
+            $.ajax({
+                url: '@Url.Action("CreateChapter", "CourseChannel")',
+                data: { courseId: '@Model.Id' ,chapterName: chapterName },
+                type: "GET",
+                 success: function (errorMsg) {
+                     if (errorMsg == "") {
+                         displaySuccess("Chapter is created Successfully!");
+                         $('#ChapterGrid').data('kendoGrid').dataSource.read();
+                         $('#ChapterGrid').data('kendoGrid').refresh();
+                         document.getElementById("AddChapterSectionForm").reset();
+                     }
+                },
+                error: function (errorMsg) {
+                    displayError("<i class='fa fa-warning smallPaddingLeftRight'></i> " + errorMsg);
+                }
+            });
+        }
+    }
+    function DeleteChapter(chapterId) {
+        if (confirm("Are you sure to delete the chapter?")) {
+            $.ajax({
+                url: '@Url.Action("Delete_Chapter", "Chapter")',
+                type: "GET",
+                data: { Id: chapterId },
+                success: function (result) {
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                        setTimeout(function () {
+                           location.reload();
+                        }, 2000);
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function showEditForm() {
+        $("#editFormModal").show();
+    }
+</script>

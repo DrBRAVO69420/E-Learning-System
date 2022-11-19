@@ -1,0 +1,115 @@
+﻿@model OnlineLearning.Models.ThreadViewModels
+@{
+    ViewBag.Title = "Create / Edit Discussion Topic";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+    <div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","thread",new { Id = Model.CourseChannelId})"> Discussion Topics</a></li>
+                @if (Model.Id == null || Model.Id == Guid.Empty)
+                {
+                    <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editthread" ? "active-breadcrumb-item" : "")" href="@Url.Action("editthread","thread")"> Add New Topic</a></li>
+                }
+                else
+                {
+                    <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editthread" ? "active-breadcrumb-item" : "")" href="@Url.Action("editthread","thread",new { Id = Model.Id})"> Edit Topic</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","thread",new { Id = Model.CourseChannelId})"> Discussion Topics</a></li>
+        @if (Model.Id == null || Model.Id == Guid.Empty)
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editthread" ? "active-breadcrumb-item" : "")" href="@Url.Action("editthread","thread")"> Add New Topic</a></li>
+        }
+        else
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editthread" ? "active-breadcrumb-item" : "")" href="@Url.Action("editthread","thread",new { Id = Model.Id})"> Edit Topic</a></li>
+        }
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    @if (Model.Id == null || Model.Id == Guid.Empty)
+    {
+        <h3 class="text-indigo bolder">Add New Topic</h3>
+    }
+    else
+    {
+        <h3 class="text-indigo bolder">Edit Topic</h3>
+    }
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top" style="padding-bottom:50px">
+    <div class="w3-white w3-card w3-padding-16 mediumPaddingLeftRight">
+        @using (Html.BeginForm("EditThread", "Thread", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.CourseChannelId)
+            <div class="row">
+                <label class="required">Title</label>
+            </div>
+            <div class="row">
+                @Html.Kendo().TextBoxFor(m => m.ThreadTitle)
+            </div>
+            <div class="row">
+                @Html.ValidationMessageFor(m => m.ThreadTitle, "", new { @class = "text-danger" })
+            </div>
+            <div class="row">
+                <label class="required">Content</label>
+            </div>
+            <div class="row">
+                @(Html.Kendo()
+                           .EditorFor(m => m.Content)
+                           .Tools(tools => tools
+                               .Clear()
+                               .Formatting()
+                               .Bold()
+                               .Italic()
+                               .Underline()
+                               .Strikethrough()
+                               .Outdent()
+                               .JustifyLeft()
+                               .JustifyCenter()
+                               .JustifyRight()
+                               .JustifyFull()
+                               .Indent()
+                               .InsertOrderedList()
+                               .InsertUnorderedList()
+                               .CreateLink()
+                               .TableEditing()
+                               .FontColor()
+                               .BackColor()
+                               .InsertImage()
+                           )
+                       .Encode(false)
+                       .StyleSheets(css => css.Add(Url.Content("~/Content/customstyle.css")).Add(Url.Content("~/Content/w3css.css")))
+                       .Resizable(true)
+                       .Value(@<text>
+
+                    </text>)
+                )
+            </div>
+            <div class="row">
+                @Html.ValidationMessageFor(m => m.Content, "", new { @class = "text-danger" })
+            </div>
+            <div class="row">
+                <span class="smallPaddingLeftRight">
+                    <a href="@Url.Action("list","thread",new { Id = Model.TopNavViewModels.CourseChannelId})" class="btn w3-white w3-border-indigo w3-hover-opacity w3-round-large btn-lg">Back</a>
+                </span>
+                <span class="smallPaddingLeftRight">
+                    <input class="button-indigo" value="Submit" type="submit" />
+                </span>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>

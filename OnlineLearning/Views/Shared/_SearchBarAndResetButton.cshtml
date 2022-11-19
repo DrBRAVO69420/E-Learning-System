@@ -1,0 +1,175 @@
+﻿<style>
+    
+input, select, textarea {
+    max-width: 1900px;
+}
+
+</style>
+<div class="row searchBar" style="margin:0px;padding-left:0px;padding-bottom:8px">
+    <div class="col-md-10">
+        <div class="input-group small">
+            <span class="input-group-addon text-indigo bolder"><i class="glyphicon glyphicon-search"></i></span>
+            <input id="search" type="text" class="k-textbox" placeholder="@ViewData["SearchPlaceHolder"]" onkeyup="onSearchKeyUp('@ViewData["GridId"].ToString()')" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <button class="button-indigo small padding-5 mediumPaddingLeftRight" id="reset" onclick="onResetSearch('@ViewData["GridId"].ToString()')">Clear Search</button>
+    </div>
+</div>
+
+@*<div class="row searchBar" style="margin:0px;padding-left:0px">
+    <div class="col-md-10" style="padding-left:0px">
+        <div class="form-group has-feedback ">
+            <input id="search" type="text" class="k-textbox" placeholder="@ViewData["SearchPlaceHolder"]" onkeyup="onSearchKeyUp('@ViewData["GridId"].ToString()')" />
+            <i class="glyphicon glyphicon-search form-control-feedback"></i>
+        </div>
+    </div>
+    <div class="col-md-2" style="padding-left:5px;">
+        <button class="button-indigo" id="reset" onclick="onResetSearch('@ViewData["GridId"].ToString()')">Clear Search</button>
+    </div>
+</div>*@
+
+<script>
+    function onSearchKeyUp(gridId) {
+        var valSearched = $('#search').val();
+        var grid = $("#" + gridId).data("kendoGrid");
+        if (gridId == 'UserGrid') {
+            console.log("here");
+            grid.dataSource.filter({
+                logic: "or",
+                filters: [
+                    {
+                        field: "Username",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                     {
+                        field: "Email",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                      {
+                        field: "Name",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                      {
+                        field: "Role",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                      {
+                        field: "UserStatus",
+                        operator: "contains",
+                        value: valSearched
+                    },{
+                        field: "Code",
+                        operator: "contains",
+                        value: valSearched
+                    }
+                ]
+            });
+        } 
+        if ( gridId == 'GeneralAnnouncementGrid') {
+            grid.dataSource.filter({
+                logic: "or",
+                filters: [
+                    {
+                        field: "TitleText",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                     {
+                        field: "Details",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                      {
+                        field: "AdminName",
+                        operator: "contains",
+                        value: valSearched
+                    }
+                ]
+            });
+        } 
+        if ( gridId == 'CourseChannelAnnouncementGrid') {
+            grid.dataSource.filter({
+                logic: "or",
+                filters: [
+                    {
+                        field: "TitleText",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                     {
+                        field: "Details",
+                        operator: "contains",
+                        value: valSearched
+                    }
+                ]
+            });
+        } 
+        if ( gridId == 'AssignmentGrid') {
+                grid.dataSource.filter({
+                    logic: "or",
+                    filters: [
+                        {
+                            field: "AssignmentTitle",
+                            operator: "contains",
+                            value: valSearched
+                        }
+                    ]
+                });
+        } 
+        if ( gridId == 'StudentGrid') {
+            grid.dataSource.filter({
+                logic: "or",
+                filters: [
+                    {
+                        field: "Name",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                    {
+                        field: "Code",
+                        operator: "contains",
+                        value: valSearched
+                    }
+                ]
+            });
+        } 
+        if ( gridId == 'ThreadGrid') {
+            grid.dataSource.filter({
+                logic: "or",
+                filters: [
+                    {
+                        field: "ThreadTitle",
+                        operator: "contains",
+                        value: valSearched
+                    }
+                ]
+            });
+        } 
+        if ( gridId == 'QuizGrid') {
+            grid.dataSource.filter({
+                logic: "or",
+                filters: [
+                    {
+                        field: "QuizTitle",
+                        operator: "contains",
+                        value: valSearched
+                    },
+                    {
+                        field: "Instruction",
+                        operator: "contains",
+                        value: valSearched
+                    }
+                ]
+            });
+        } 
+    }
+    function onResetSearch(gridId) {
+        $('#search').val('');
+        $("#" + gridId).data("kendoGrid").dataSource.filter([]);
+    }
+</script>

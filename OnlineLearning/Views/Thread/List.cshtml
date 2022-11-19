@@ -1,0 +1,204 @@
+﻿@model OnlineLearning.Models.ThreadViewModels
+@using Microsoft.AspNet.Identity;
+@{
+    ViewBag.Title = "Discussion Topics for " + Model.TopNavViewModels.CourseChannelName;
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var loginUserId = User.Identity.GetUserId();
+     var teacherUser = User.IsInRole("Teacher");
+    var studentUser = User.IsInRole("Student");
+}
+<style>
+    .k-grid tr td {
+        border-style: solid;
+        border-color: transparent;
+    }
+
+    .k-grid-header {
+        display: none;
+    }
+</style>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        <i class="fa fa-commenting smallPaddingLeftRight"></i> Discussion Topics
+    </h3>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color:#c7a4ca;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-comment w3-xxlarge"></i></div>
+            <div class="w3-right">
+                <h1 style="margin:0">@Model.TotalThread</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h4 style="margin-top:3px;margin-bottom:0px">@Html.LabelFor(m => m.TotalThread)</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color: #f0f0df;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-edit w3-xxlarge"></i></div>
+            <div class="w3-right">
+                <h1 style="margin:0">@Model.ThreadByLoginUser</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h4 style="margin-top:3px;margin-bottom:0px">@Html.LabelFor(m => m.ThreadByLoginUser)</h4>
+        </div>
+    </div>
+    @if (teacherUser)
+    {
+        <div class="col-md-4">
+            <div class="w3-card w3-container w3-padding-16" style="background-color:#b6ccb1;color:#0a1210;">
+                <div class="w3-left"><i class="	glyphicon glyphicon-education w3-xxlarge"></i></div>
+                <div class="w3-right">
+                    <h1 style="margin:0">@Model.ThreadByStudent</h1>
+                </div>
+                <div class="w3-clear"></div>
+                <h4 style="margin-top:3px;margin-bottom:0px">@Html.LabelFor(m => m.ThreadByStudent)</h4>
+            </div>
+        </div>
+    }
+    @if (studentUser)
+    {
+        <div class="col-md-4">
+            <div class="w3-card w3-container w3-padding-16" style="background-color:#b6ccb1;color:#0a1210;">
+                <div class="w3-left"><i class="glyphicon glyphicon-blackboard w3-xxlarge"></i></div>
+                <div class="w3-right">
+                    <h1 style="margin:0">@Model.ThreadByTeacher</h1>
+                </div>
+                <div class="w3-clear"></div>
+                <h4 style="margin-top:3px;margin-bottom:0px">@Html.LabelFor(m => m.ThreadByTeacher)</h4>
+            </div>
+        </div>
+    }
+
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row smallPaddingTopBottom">
+    <div class="w3-white w3-card">
+        <div class="row">
+            @Html.Partial("~/Views/Shared/_SearchBarAndResetButton.cshtml", new ViewDataDictionary { { "GridId", "ThreadGrid" }, { "SearchPlaceHolder", "Search a Topic" } })
+        </div>
+        <div class="row">
+            @(Html.Kendo().Grid<OnlineLearning.Models.ThreadViewModels>()
+                        .Name("ThreadGrid")
+                        .Columns(columns =>
+                        {
+                            columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Text/Link Materials").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+columns.Bound(c => c.Id).Hidden();
+columns.Bound(c => c.ProfilePic).Width(250).ClientTemplate("#if(data.ProfilePic == null){# <div class='text-center'><a href='" +
+    Url.Action("profile", "account") +
+    "/#=data.UserId#'  target='_blank'><img src='/Assest/defaultProfilePic.png' alt='#=data.ProfilePic#' class='w3-circle smallPaddingTopBottom smallPaddingLeftRight gold-border' style='width:60px;' ></a></div> #}else{# <div class='text-center'><a href='/user/profile/#=data.UserId#' target='_blank'><img src='/UploadedFiles/#=data.ProfilePic#' alt='#=data.ProfilePic#' class='w3-circle' style='width:60px'  ></a></div> #}# ").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+columns.Bound(c => c.ThreadTitle).Width(600).ClientTemplate("<h4><a class='bolder link' href='" +
+    Url.Action("detail", "thread") +
+    "/#=Id#'>#=data.ThreadTitle#</a></h4><div class='w3-opacity-min'>By <b>#=data.Name#</b>, on <b>#=strLastUpdate#</b> </div>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+columns.Bound(c => c.PostCount).Width(200).ClientTemplate("<div class='w3-large'>#=data.PostCount# Replies</div>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+columns.Command(command =>
+{
+command.Custom("Edit").IconClass(" ").Text("<i class='glyphicon glyphicon-pencil edit-btn' style='font-size:18px'></i>").Click("EditSelectedThread").HtmlAttributes(new { id = "editThreadBtn" });
+command.Custom("Destroy").IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").Click("DeleteSelectedThread").HtmlAttributes(new { id = "deleteThreadBtn" });
+})
+.Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+})
+.ToolBar(toolbar => toolbar.Custom().Name("addThreadBtn").Action("editthread", "thread", new { courseChannelId = Model.CourseChannelId }).IconClass("k-icon k-i-plus").Text("Add New Topic").HtmlAttributes(new { @id = "addThreadBtn", @class = "button-indigo" }))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_Thread", "Thread", new { CourseChannelId = Model.CourseChannelId }))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("onDataBoundGrid"))
+            )
+        </div>
+    </div>
+</div>
+
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">
+        <h5><a class='bolder link' href='@Url.Action("detail","thread")/#=Id#'>#=data.ThreadTitle#</a></h5>
+        <div class='w3-opacity-min'>By <b>#=data.Name#</b>, on <b>#=strLastUpdate#</b> </div>
+    </p>
+    <p class="col-template-val"><b><i class="glyphicon glyphicon-comment w3-opacity-min"></i> #=data.PostCount# Replies</b></p>
+</script>
+
+
+<script>
+    if ('@TempData["ThreadUpdated"]' != null && '@TempData["ThreadUpdated"]' != "") {
+        displaySuccess("'@TempData["ThreadUpdated"]'");
+    }
+    $("#ThreadGrid").kendoTooltip({
+        filter: ".k-grid-Edit",
+        position: "auto",
+        content: "Edit"       
+    });
+    $("#ThreadGrid").kendoTooltip({
+        filter: ".k-grid-Destroy",
+        position: "auto",
+        content: "Delete"       
+    });
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    function EditSelectedThread(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("editthread","thread")?courseChannelId=" + dataItem.CourseChannelId + "&threadId=" + dataItem.Id;
+    }
+    function DeleteSelectedThread(e){
+        e.preventDefault();
+        if (confirm("All the replies of this discussion topic will also be deleted and cannot be recovered. Are you sure to delete the record?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var grid = $("#ThreadGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Delete_Thread", "Thread")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (result) {
+                    grid.dataSource.read();
+                    grid.refresh();
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function onDataBoundGrid(e) {
+         $('#ThreadGrid .k-grid-content').attr("style", "height:auto");
+            var grid = $("#ThreadGrid").data("kendoGrid");
+            var items = e.sender.items();
+            items.each(function (index) {
+                var dataItem = grid.dataItem(this);
+                //if the topic is not created by the login user, he/she cannot edit or delete it
+                if (dataItem.UserId != '@loginUserId') {
+                    $("tr[data-uid='" + dataItem.uid + "']").find("#editThreadBtn").addClass("w3-hide");
+                    //$("tr[data-uid='" + dataItem.uid + "']").find("#ApproveBtn").css('opacity', '0.2');
+
+                     $("tr[data-uid='" + dataItem.uid + "']").find("#deleteThreadBtn").addClass("w3-hide");
+                    //$("tr[data-uid='" + dataItem.uid + "']").find("#RejectBtn").css('opacity', '0.2');
+                }
+            });
+    }
+
+    
+</script>

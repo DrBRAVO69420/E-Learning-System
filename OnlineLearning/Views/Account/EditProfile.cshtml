@@ -1,0 +1,159 @@
+﻿@model OnlineLearning.Models.UserViewModel
+@{
+    ViewBag.Title = "Edit Profile";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+<style>
+    #Name:hover{
+        background-color:#eee;
+    }
+    #Email:hover{
+          background-color:#eee;
+    }
+</style>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        <i class="glyphicon glyphicon-edit"></i> Edit Profile
+    </h3>
+</div>
+<div class="row">
+    <div class="w3-card w3-white w3-padding-16 mediumPaddingLeftRight">
+        <div class="row text-center">
+            <img src="~/UploadedFiles/@Model.ProfilePic" class="img-circle text-center" style="width:200px" />
+        </div>
+        <div class="row largePaddingLeftRight">
+            @using (Html.BeginForm("EditProfile", "Account", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+            {
+                @Html.HiddenFor(m => m.Id)
+                @Html.HiddenFor(m => m.Gender)
+                @Html.HiddenFor(m => m.Username)
+                @Html.HiddenFor(m => m.Name)
+                @Html.HiddenFor(m => m.Email)
+                <div class="smallPaddingTopBottom">
+                    @Html.LabelFor(m => m.ProfilePic)
+                    @(Html.Kendo().Upload()
+                               .Name("attachments")
+                               .Multiple(false)
+                               .Messages(m => m.Select("Select Image"))
+                               .HtmlAttributes(new { aria_label = "files" })
+                               .Validation(validation =>
+                                   validation.MaxFileSize(1000000)
+                                   .AllowedExtensions(new string[] { ".jpeg", ".png", ".jpg" })
+                                   )
+                               .Events(e => e.Select("validateFile"))
+                    )
+                    @Html.ValidationMessageFor(m => m.ProfilePic, "", new { @class = "text-danger" })
+                </div>
+                <div class="row w3-medium w3-text-dark-gray smallPaddingTopBottom">
+                    <i class="glyphicon glyphicon-info-sign"></i> Maximum File Size is 1 MB. <br />
+                    <i class="glyphicon glyphicon-info-sign"></i> Allowed file format: jpeg, png, jpg <br />
+                    <i class="glyphicon glyphicon-info-sign"></i> File name cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | '<br />
+                </div>
+                <div class="smallPaddingTopBottom">
+                    @Html.LabelFor(m => m.Name, new { @class = "required" })
+                    @Html.Kendo().TextBoxFor(m => m.Name).HtmlAttributes(new { @readonly = "readonly" })
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                </div>
+                <div class="smallPaddingTopBottom">
+                    @Html.LabelFor(m => m.Email, new { @class = "required" })
+                    @Html.Kendo().TextBoxFor(m => m.Email).HtmlAttributes(new { @readonly = "readonly" })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                </div>
+                <div class="smallPaddingTopBottom">
+                    @Html.LabelFor(m => m.Biography)
+                    @(Html.Kendo()
+                           .EditorFor(m => m.Biography)
+                           .Tools(tools => tools
+                               .Clear()
+                               .Bold()
+                               .Italic()
+                               .Underline()
+                               .Strikethrough()
+                               .Outdent()
+                               .JustifyLeft()
+                               .JustifyCenter()
+                               .JustifyRight()
+                               .JustifyFull()
+                               .Indent()
+                               .InsertOrderedList()
+                               .InsertUnorderedList()
+                               .CreateLink()
+                               .FontColor()
+                               .BackColor()
+                           )
+                       .Encode(false)
+                       .StyleSheets(css => css.Add(Url.Content("~/Content/customstyle.css")).Add(Url.Content("~/Content/w3css.css")))
+                       .Resizable(true)
+                       .Value(@<text>
+
+                    </text>)
+                    )
+                    @Html.ValidationMessageFor(m => m.Biography, "", new { @class = "text-danger" })
+                </div>
+                <div class="row">
+                    <button class="button-indigo" type="submit">Submit</button>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // ------------------------- Validate File Upload -------------------------
+    function validateFile(e) {
+        $('#addAssignmentError').css('display', 'none');
+        var upload = $("#attachments").data("kendoUpload"), files = upload.getFiles();
+        var fileInfo = e.files[0];
+        var wrapper = this.wrapper;
+        $.each(e.files, function () {
+            var currentFileName = this.name;
+            var currentFileUid = this.uid;
+            // check whether the file name contain special characters
+            if (!charCheck(currentFileName)) {
+                $("#addAssignmentError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> The filename cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | ' Please rename your file and try again.");
+                $('#addAssignmentError').css('display', 'block');
+                e.preventDefault();
+                return;
+            }
+            // check whether file name already exists in database
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ValidateUpload", "Assignment")',
+                data: { currentFileName: currentFileName },
+                cache: false,
+                success: function (response) {
+                    if (response) {
+                        $("#addAssignmentError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> " + response);
+                        $('#addAssignmentError').css('display', 'block');
+                        $('#addAssignmentError').delay(3000).fadeOut(300);
+                        upload.removeFileByUid(currentFileUid);
+                    }
+                    else {
+                        var raw = fileInfo.rawFile;
+                        var reader = new FileReader();
+                        if (raw) {
+                            reader.onloadend = function () {
+                            var preview = $("<img class='image-preview'>").attr("src", this.result);
+                            wrapper.find(".k-file[data-uid='" + fileInfo.uid + "'] .k-file-extension-wrapper")
+                              .replaceWith(preview);
+                          };
+                          reader.readAsDataURL(raw);
+                        }
+                        return null;
+                    }
+                }
+            });
+        });
+    }
+    function charCheck(val) {
+        var chars = ['~', '#', '%', '&', '*', '{', '}', '\\', ':', '<', '>', '?', '/', '+', '|', '"', "'"];
+
+        for (var i = 0; i < chars.length; i++) {
+            if (val.indexOf(chars[i]) != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+</script>

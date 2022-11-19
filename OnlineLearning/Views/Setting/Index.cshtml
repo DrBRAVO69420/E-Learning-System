@@ -1,0 +1,59 @@
+﻿@model OnlineLearning.Models.SettingViewModels
+@{
+    ViewBag.Title = "Setting";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+<div class="largePaddingTopBottom">
+    <div class="row">
+        <div class="col-md-10 centerBlock">
+            <div class="col-md-12 w3-white padding-32" style="border-radius:10px">
+                <div class="col-md-8 centerBlock">
+                    @using (Html.BeginForm("PostSetting", "Setting", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="row text-center padding-0">
+                            @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+                        </div>
+                        @Html.HiddenFor(m => m.Id)
+                        <h3 class="text-indigo text-center w3-padding-24 bolder"><b>SETTING</b></h3>
+                        @Html.ValidationSummary("", new { @class = "text-danger text-center" })
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Background, new { @class = "col-md-2 control-label required" })
+                            <div class="col-md-10">
+                                @(Html.Kendo().DropDownList()
+                                      .Name("Background")
+                                      .OptionLabel("-Select a Theme-")
+                                      .DataTextField("Text")
+                                      .DataValueField("Value")
+                                      .BindTo(new List<SelectListItem>() {
+                                          new SelectListItem() {
+                                              Text = "Dark Theme",
+                                              Value = "Dark"
+                                          },
+                                          new SelectListItem() {
+                                              Text = "Light Theme",
+                                              Value = "Light"
+                                          }
+                                      })
+                                      .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                                @Html.ValidationMessageFor(m => m.Background, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group w3-padding-16">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="submit" value="Submit" class="button-indigo width100" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    if ('@TempData["SettingUpdated"]' != null && '@TempData["SettingUpdated"]' != "") {
+        displaySuccess("@TempData["SettingUpdated"]");
+    }
+</script>

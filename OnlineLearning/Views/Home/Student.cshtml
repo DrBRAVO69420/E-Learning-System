@@ -1,0 +1,264 @@
+﻿@model OnlineLearning.Models.StudentHomeDashboardViewModels
+@{
+    ViewBag.Title = "Student Home";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+<style>
+    label {
+        margin-bottom: 0px;
+        font-weight: lighter;
+    }
+
+    h1 {
+        margin-top: 0px;
+        font-family: "Poppins";
+        font-size: 48px;
+        font-weight: bolder;
+    }
+
+    .panel {
+        margin-bottom: 0px;
+    }
+
+    @@media (max-width:420px) {
+        .dashboardColumn {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    }
+</style>
+<div class="row mediumPaddingLeftRight">
+    <h4 class="text-indigo bolder mediumPaddingTopBottom smallPaddingLeftRight" style="background-color:#f0f0f5;margin-bottom:0px;">
+        <i class="glyphicon glyphicon-bullhorn"></i> Latest News & Announcements
+    </h4>
+    <div class="row" style="padding-top:0px">
+        @Html.Partial("~/Views/Shared/_LatestNewsAnnouncements.cshtml")
+    </div>
+</div>
+
+
+
+<div class="row smallPaddingTopBottom dashboardColumn">
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color:#c7a4ca;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-briefcase w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h1>@Model.TotalCourseChannels</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h5>@Html.LabelFor(m => m.TotalCourseChannels)</h5>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color: #f0f0df;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-tasks w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h1>@Model.TotalAssignment</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h5>@Html.LabelFor(m => m.TotalAssignment)</h5>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color:#b6ccb1;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-question-sign w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h1>@Model.TotalQuizzes</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h5>@Html.LabelFor(m => m.TotalQuizzes)</h5>
+        </div>
+    </div>
+</div>
+
+<div class="row mediumPaddingLeftRight">
+    <h4 class="text-indigo bolder mediumPaddingTopBottom smallPaddingLeftRight" style="background-color:#f0f0f5;margin-bottom:0px;margin-top:0px">
+        <i class="glyphicon glyphicon-briefcase"></i> My Enrollments
+    </h4>
+    @(Html.Kendo().Grid<OnlineLearning.Models.CourseChannelViewModel>()
+                    .Name("EnrollmentGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("My Enrollments").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+columns.Bound(c => c.Id).Hidden();
+
+columns.Bound(c => c.Name).ClientTemplate("<div class='row smallPaddingLeftRight'><h5 class='padding-0' style='margin-bottom:0px'><a class='link bolder' href='" +
+    Url.Action("manage", "coursechannel") +
+    "/#=Id#' >#=Name#</a></h5></div>")
+.HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+columns.Bound(c => c.LastestAnnouncement.Title).Title("Latest Announcement").ClientTemplate("<div class='row smallPaddingLeftRight'><h5 class='padding-0' style='margin-bottom:0px'> #if(data.LastestAnnouncement.Id == null || data.LastestAnnouncement.Id == '00000000-0000-0000-0000-000000000000'){# <span class='text-warning bolder'>No Latest Announcement</span> #} else{#<a class='link bolder'  href='" +
+    Url.Action("detail", "announcement") +
+    "/#=LastestAnnouncement.Id#' >#=LastestAnnouncement.Title#</a> #}# </h5></div>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+
+columns.Bound(c => c.CreatorName).ClientTemplate("<span>by - <a class='link bolder' href='" +
+    Url.Action("profile", "account") +
+    "/#=CreatorUserId#'  target='_blank'>#=CreatorName#</a></span>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+})
+
+.Pageable()
+.NoRecords("<span class='text-danger'>No Record</span>")
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_StudentEnrollment", "Home"))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('EnrollmentGrid')"))
+    )
+</div>
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val" style="margin:0px">
+        <div class="row">
+            <b>Course Channel:</b>
+        </div>
+        <div class='row'>
+            <a class='link bolder' href='@Url.Action("manage","coursechannel")/#=data.Id#'>#=Name#</a>
+            <span>by - <a class='link bolder' href='@Url.Action("profile","account")/#=CreatorUserId#' target='_blank'>#=CreatorName#</a></span>
+        </div>
+    </p>
+    <p class="col-template-val" style="margin:0px">
+        <div class="row">
+            <b>Latest Announcement:</b>
+        </div>
+        <div class='row'>
+            #if(data.LastestAnnouncement.Id == null || data.LastestAnnouncement.Id == '00000000-0000-0000-0000-000000000000')
+            {# <span class='text-warning bolder'>No Latest Announcement</span> #}
+            else{# <a class='link bolder' href='@Url.Action("detail","announcement")/#=data.LastestAnnouncement.Id#'>#=data.LastestAnnouncement.Title#</a> #}#
+            
+        </div>
+
+    
+    </p>
+  
+</script>
+
+<div class="row w3-padding-16">
+    <div class="col-md-6">
+        <div class="panel">
+            <div class="panel-heading bolder w3-border-bottom mediumPaddingTopBottom" style="background-color:white;color:#402e37;">
+                <h6 class="bolder" style="margin:0px">
+                    <i class="glyphicon glyphicon-time text-gold"></i>
+                    5 Upcoming Expired Assignments
+                </h6>
+            </div>
+            <div class="panel-body">
+                @if (Model.UpcomingExpiredQuizzes.Count == 0)
+                {
+                    <div class="text-center text-danger">
+                        No Record
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model.UpcomingExpiredAssignments)
+                    {
+                        <div class="row">
+                            <div class="row w3-opacity small">
+                                @item.CourseChannelName
+                            </div>
+                            <div class="row" style="font-size:15px">
+                                <div class="col-md-3 bolder" style="padding:0px 5px 0px 5px">
+                                    <a class="link bolder" href="@Url.Action("detail","assignment",new { Id = item.Id})" target="_blank">@item.AssignmentTitle</a>
+                                </div>
+                                <div class="col-md-4" style="padding:0px 5px 0px 5px">
+                                    Due On @item.DueDate
+                                </div>
+                                <div class="col-md-5 text-gold bolder" style="padding:0px 5px 0px 5px">
+                                    @item.TimeRemaining
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel">
+            <div class="panel-heading bolder w3-border-bottom mediumPaddingTopBottom" style="background-color:white;color:#402e37;">
+                <h6 class="bolder" style="margin:0px">
+                    <i class="glyphicon glyphicon-time text-gold"></i>
+                    5 Upcoming Expired Quizzes
+                </h6>
+            </div>
+            <div class="panel-body">
+                @if (Model.UpcomingExpiredQuizzes.Count == 0)
+                {
+                    <div class="text-center text-danger">
+                        No Record
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model.UpcomingExpiredQuizzes)
+                    {
+                        <div class="row small">
+                            <div class="row w3-opacity">
+                                @item.CourseChannelName
+                            </div>
+                            <div class="row" style="font-size:15px">
+                                <div class="col-md-3 bolder" style="padding:0px 5px 0px 5px">
+                                    <a class="link bolder" href="@Url.Action("detail","quiz",new { Id = item.Id})" target="_blank">@item.QuizTitle</a>
+                                </div>
+                                <div class="col-md-4" style="padding:0px 5px 0px 5px">
+                                    Due On @item.DueDateTime
+                                </div>
+                                <div class="col-md-5 text-gold bolder" style="padding:0px 5px 0px 5px">
+                                    @item.TimeRemaining
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="w3-border w3-container w3-padding-16" style="background-color: white;color:#855389;">
+            <h4 class="bolder">@Html.LabelFor(m => m.HighestGradeAssignment)</h4>
+            <div class="w3-left">
+                <h1 style="margin-bottom:5px">@Model.HighestGradeAssignment.Grade</h1>
+                <div class="small">@Model.HighestGradeAssignment.CourseChannelName</div>
+            </div>
+            <div class="w3-right">
+                <h3>@Model.HighestGradeAssignment.AssignmentTitle</h3>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="w3-border w3-container w3-padding-16" style="background-color:white;color:#2e5325;">
+            <h4 class="bolder">@Html.LabelFor(m => m.LowestGradeAssignment)</h4>
+            <div class="w3-left">
+                <h1 style="margin-bottom:5px">@Model.LowestGradeAssignment.Grade</h1>
+                <div class="small">@Model.LowestGradeAssignment.CourseChannelName</div>
+            </div>
+            <h3 class="w3-right">@Model.LowestGradeAssignment.AssignmentTitle</h3>
+        </div>
+    </div>
+</div>
+<script>
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+</script>

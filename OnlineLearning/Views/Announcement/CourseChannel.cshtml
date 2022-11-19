@@ -1,0 +1,151 @@
+﻿@model OnlineLearning.Models.AnnouncementViewModel
+@{
+    ViewBag.Title = "Course Channel Announcements";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var teacherUser = false;
+    if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+    {
+        teacherUser = true;
+    }
+}
+
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        <i class="glyphicon glyphicon-bullhorn smallPaddingLeftRight"></i> Announcement List
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+
+<div class="row w3-padding-16 small-margin-top">
+    <div class="w3-white w3-card smallPaddingLeftRight">
+        <div class="row smallPaddingTopBottom">
+            @Html.Partial("~/Views/Shared/_SearchBarAndResetButton.cshtml", new ViewDataDictionary { { "GridId", "CourseChannelAnnouncementGrid" }, { "SearchPlaceHolder", "Search Title / Details" } })
+        </div>
+        <div class="row">
+            @(Html.Kendo().Grid<OnlineLearning.Models.AnnouncementViewModel>()
+                        .Name("CourseChannelAnnouncementGrid")
+                        .Columns(columns =>
+                        {
+                            columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Announcements").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                            columns.Bound(c => c.Id).Hidden();
+                            if (teacherUser)
+                            {
+                                columns.Bound(c => c.TitleText).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                                columns.Bound(c => c.Details).Width(600).Encoded(false).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                            }
+                            else
+                            {
+                                columns.Bound(c => c.TitleText).ClientTemplate("<h4><a class='link bolder' href='" + Url.Action("detail", "announcement") + "/#=Id#' >#=TitleText#</a></h4>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                            }
+                            columns.Bound(c => c.strLastUpdate).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                            if (teacherUser)
+                            {
+                                columns.Command(command =>
+                                {
+                                    command.Custom("Edit").IconClass(" ").Text("<i class='glyphicon glyphicon-pencil edit-btn' style='font-size:18px'></i>").Click("EditSelectedAnnouncement");
+                                    command.Custom("Destroy").IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").Click("DeleteSelectedAnnouncement");
+                                }).Width(150).Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+                            }
+                        })
+.ToolBar(toolbar =>
+{
+    if (teacherUser)
+    {
+        toolbar.Custom().Name("addAnnouncementBtn").Action("editannouncement", "announcement", new { courseChannelId = Model.TopNavViewModels.CourseChannelId })
+        .IconClass("k-icon k-i-plus").Text("Add Announcement").HtmlAttributes(new { @id = "addAnnouncementBtn", @class = "button-indigo" });
+    }
+})
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_CourseAnnouncement", "Announcement", new { CourseChannelId = Model.TopNavViewModels.CourseChannelId }))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('CourseChannelAnnouncementGrid')"))
+            )
+        </div>
+    </div>
+</div>
+
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    @if (teacherUser)
+    {
+        <p class="col-template-val bolder">#=data.TitleText#</p>
+        <p class="col-template-val">#=data.Details#</p>
+        <p class="col-template-val"><b>Last Updated On:</b> #=data.strLastUpdate#</p>
+    }
+    else
+    {
+        <p class="col-template-val">
+            <h4><a class='link bolder' href='@Url.Action("detail","announcement")/#=Id#'>#=TitleText#</a></h4>
+        </p>
+        <p class="col-template-val small"><b>Last Updated On:</b> #=kendo.toString(LastUpdate,'yyyy-MM-dd,  hh:mm tt')#</p>
+    }
+
+</script>
+
+
+<script>
+    if ('@TempData["AnnouncementUpdated"]' != null && '@TempData["AnnouncementUpdated"]' != "") {
+        displaySuccess("'@TempData["AnnouncementUpdated"]'");
+    }
+    $("#CourseChannelAnnouncementGrid").kendoTooltip({
+        filter: ".k-grid-Edit",
+        position: "auto",
+        content: "Edit"       
+    });
+     $("#CourseChannelAnnouncementGrid").kendoTooltip({
+        filter: ".k-grid-Destroy",
+        position: "auto",
+        content: "Delete"       
+    });
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+
+    function EditSelectedAnnouncement(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+         location.href = "@Url.Action("editannouncement","announcement")?courseChannelId=" + dataItem.CourseChannelId + "&announcementId=" + dataItem.Id;
+    }
+    function DeleteSelectedAnnouncement(e) {
+        e.preventDefault();
+        if (confirm("Are you sure to delete the announcement?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var grid = $("#CourseChannelAnnouncementGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Delete_Announcement", "Announcement")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (result) {
+                    grid.dataSource.read();
+                    grid.refresh();
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+</script>

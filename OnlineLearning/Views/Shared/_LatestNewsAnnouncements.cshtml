@@ -1,0 +1,42 @@
+﻿@(Html.Kendo().Grid<OnlineLearning.Models.AnnouncementViewModel>
+        ()
+        .Name("AnnouncementGrid")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Id).Hidden();
+        })
+        .ClientRowTemplate("<div class='mediumPaddingLeftRight w3-border-bottom'><h3 class='bolder' style='margin-bottom:0px'>#=TitleText#</h3><div class='w3-opacity small'>Last Updated By <b>#=AdminName#</b> , On <b>#=strLastUpdate#</b></div><div class='mediumPaddingTopBottom'>#=Details#</div></div>")
+.Pageable()
+.NoRecords("<div class='text=center text-danger'>No Record</div>")
+.Sortable()
+.Resizable(r => r.Columns(true))
+.Scrollable()
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators
+.ForString(str => str.Clear()
+.Contains("Contains")
+.IsEqualTo("Is equal to")
+)
+.ForDate(dt => dt.Clear()
+.IsEqualTo("Is equal to")
+.IsGreaterThan("Is after")
+.IsLessThan("Is before")
+)
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 1, 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(1)
+.Events(events => events.Error("error_handler"))
+.Model(model =>
+{
+    model.Id(m => m.Id);
+})
+.Read(read => read.Action("Read_CampusAnnouncement", "Announcement"))
+.Events(e => e.RequestEnd("onRequestEnd"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('AnnouncementGrid')"))
+)

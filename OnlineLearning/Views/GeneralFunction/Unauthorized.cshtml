@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewBag.Title = "Unauthorized Access";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<div class="row">
+    <div class="w3-white w3-card padding-32">
+        <header class="row text-center">
+            <h3><b>@ViewBag.Title</b></h3>
+        </header>
+        <div class="row">
+            <div class="pabel panel-danger">
+                <div class="panel-heading text-center" style="border-bottom:1px solid gray">
+                    <i class="fa fa-close"></i> Failed to access this page <i class="fa fa-close"></i>
+                </div>
+                <div class="panel-body" style="background-color:white">
+                    <p class="text-center">
+                        You are not authorized to access this page.
+                    </p>
+                    <div class="row text-center">
+                        <a class="text-center button-indigo" style="width:60%" href="@Url.Action("login","account")">Back to home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

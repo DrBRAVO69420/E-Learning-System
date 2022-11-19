@@ -1,0 +1,446 @@
+﻿@model OnlineLearning.Models.ChapterViewModels
+@{
+    ViewBag.Title = "Edit Chapter";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+<style>   
+    /*.k-grid td .k-button {
+        background-color: transparent;
+        border-color: transparent;
+    }
+
+        .k-grid td .k-button:hover {
+            background-color: transparent;
+            border-color: transparent;
+        }*/
+    .tooltip{
+        pointer-events: none;     
+    }
+</style>
+
+<div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "manage" ? "active-breadcrumb-item" : "")" href="@Url.Action("manage","coursechannel",new { Id =Model.CourseChannelId })"> Home</a></li>
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editchapter" ? "active-breadcrumb-item" : "")" href="@Url.Action("editchapter","chapter",new { Id =Model.Id })"> Edit Chapter</a></li>
+        </ul>
+    </div>
+</div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "manage" ? "active-breadcrumb-item" : "")" href="@Url.Action("manage","coursechannel",new { Id =Model.CourseChannelId })"> Home</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editchapter" ? "active-breadcrumb-item" : "")" href="@Url.Action("editchapter","chapter",new { Id =Model.Id })"> Edit Chapter</a></li>
+    </ul>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<!-- --------------------------- Chapter Title Form --------------------------- -->
+<div class="row small-margin-top smallPaddingTopBottom">
+    @using (Html.BeginForm("EditChapter", "Chapter", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    {
+        @Html.HiddenFor(m => m.Id)
+
+        <div class="w3-panel" style="        background-color: #fafafa;
+        border-left: 10px solid #593fc8;
+">
+            <h4 class="bolder text-indigo">Chapter Title</h4>
+        </div>
+        <div class="row">
+            <div class="col-md-10 padding-0">
+                @Html.Kendo().TextBoxFor(m => m.ChapterTitle).HtmlAttributes(new { @class = "w3-large bolder" })
+            </div>
+            <div class="col-md-2 smallPaddingLeftRight">
+                <button class="button-indigo" type="submit">Submit</button>
+            </div>
+        </div>
+    }
+</div>
+<!-- --------------------------- File Material Table --------------------------- -->
+<div class="row mediumPaddingTopBottom">
+    <div class="w3-panel" style="background-color:#fafafa;border-left:10px solid #593fc8;">
+        <h4 class="bolder text-indigo">File Materials</h4>
+    </div>
+    <div class="row">
+        @(Html.Kendo().Grid<OnlineLearning.Models.FileMaterialViewModels>()
+                .Name("FilesGrid")
+                .Columns(columns =>
+                {
+                    columns.Template(@<text></text>).ClientTemplate("#=resColTemplateFileGrid(data)#").Title("Files").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                    columns.Bound(c => c.Id).Hidden();
+                    columns.Bound(c => c.FileName).ClientTemplate("<a class='link bolder' href='/UploadedFiles/#=FileName#' target='_blank'>#=FileName#</a>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                    columns.Command(command =>
+                    {
+                        command.Destroy().IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").HtmlAttributes(new { id = "DeleteBtn", title="Delete" , style="height:30px"});
+                    })
+                    .Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+                })
+.ToolBar(toolbar => toolbar.Custom().Name("uploadFileBtn").Url("#").IconClass("k-icon k-i-plus").Text("Upload File").HtmlAttributes(new { @id = "uploadFileBtn", @class = "button-indigo" }))
+.Editable(editable => editable.DisplayDeleteConfirmation("Are you sure to delete this record?"))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_FileMaterial", "FileMaterial", new { ChapterId = Model.Id }))
+.Destroy(update => update.Action("Delete_FileMaterial", "FileMaterial"))
+.Events(e => e.RequestEnd("onRequestEnd"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('FilesGrid')"))
+        )
+    </div>
+</div>
+
+<!-- --------------------------- Text / Link Material Table --------------------------- -->
+<div class="row mediumPaddingTopBottom">
+    <div class="w3-panel" style="background-color:#fafafa;border-left:10px solid #593fc8;">
+        <h4 class="bolder text-indigo">Chapter Texts / Links</h4>
+    </div>
+    <div class="row">
+        @(Html.Kendo().Grid<OnlineLearning.Models.TextMaterialViewModels>()
+                    .Name("TextMaterialGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Template(@<text></text>).ClientTemplate("#=resColTemplateTextGrid(data)#").Title("Text/Link Materials").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                        columns.Bound(c => c.Id).Hidden();
+                        columns.Bound(c => c.Detail).Encoded(false).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        //columns.Bound(c => c.LastUpdate).Width(250).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.strLastUpdate).Width(250).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Command(command =>
+                        {
+                            command.Custom("Edit").IconClass(" ").Text("<i class='glyphicon glyphicon-pencil edit-btn' style='font-size:18px'></i>").Click("EditSelectedTextMaterial").HtmlAttributes(new { title="Edit"});
+                            command.Custom("Destroy").IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").Click("DeleteSelectedTextMaterial").HtmlAttributes(new { title="Delete"});
+                            command.Custom("ViewDetails").Text("<i class='glyphicon glyphicon-eye-open detail-btn' style='font-size:18px'></i>").Click("showDetails").HtmlAttributes(new { title="View Details"});
+                        }).Width(150)
+                        .Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+                    })
+.ToolBar(toolbar => toolbar.Custom().Name("addTextLinkBtn").Url("#").IconClass("k-icon k-i-plus").Text("Add Text/Link Material").HtmlAttributes(new { @id = "addTextLinkBtn", @class = "button-indigo" }))
+.Editable(editable => editable.DisplayDeleteConfirmation("Are you sure to delete this record?"))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_TextMaterial", "TextMaterial", new { ChapterId = Model.Id, Type = "Text" }))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('TextMaterialGrid')"))
+        )
+    </div>
+</div>
+
+<!-- ------------------------ Upload File Modal ------------------------ -->
+<div id="uploadFileModal" class="w3-modal">
+    <div class="w3-modal-content">
+        <div class="w3-container w3-display-container background-indigo w3-text-white w3-medium">
+            <span id="modalClose" onclick="document.getElementById('uploadFileModal').style.display='none'" class="w3-button w3-hover-indigo w3-display-topright w3-large">x</span>
+            <h3 class="w3-large" style="padding-top: 8px;padding-bottom: 8px">
+                Upload File for @Model.ChapterTitle
+            </h3>
+        </div>
+        <div class="w3-container w3-padding-16" id="modelContent">
+            <div class="row smallPaddingTopBottom">
+                <div id="uploadFileError" class="w3-medium alert alert-danger bolder" style="display:none">
+
+                </div>
+            </div>
+            <div class="row">
+                @using (Html.BeginForm("UploadFile", "FileMaterial", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+                {
+                    @Html.HiddenFor(m => m.Id)
+                    <div class="row">
+                        <label>File Material</label>
+                    </div>
+                    <div class="row">
+                        @(Html.Kendo().Upload()
+                       .Name("attachments")
+                       .Multiple(true)
+                       .HtmlAttributes(new { aria_label = "files" })
+                       .Validation(validation =>
+                           validation.MaxFileSize(25000000)
+                           .AllowedExtensions(new string[] { ".pdf", ".doc", ".docx", ".xlsx",".csv",
+                               ".ppt",".pptx" , ".zip", ".rar", ".mp4" , ".mp3", ".wav" })
+                           )
+                       .Events(e => e.Select("validateFile"))
+                        )
+                    </div>
+                    <div class="w3-medium w3-text-dark-gray smallPaddingTopBottom">
+                        <i class="glyphicon glyphicon-info-sign"></i> Maximum File Size is <b>25 MB</b>. <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> Allowed Extension: .pdf .doc .docx .xlsx .csv .ppt .pptx .zip
+                        .rar .mp4 .mp3 .wav <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> Filename cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | '<br />
+                    </div>
+                    <div class="row">
+                        <input class="button-indigo" value="Submit" type="submit" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ------------------------ Add Text Material Modal ------------------------ -->
+<div id="addTextLinkModal" class="w3-modal">
+    <div class="w3-modal-content">
+        <div class="w3-container w3-display-container background-indigo w3-text-white w3-medium">
+            <span id="modalClose" onclick="document.getElementById('addTextLinkModal').style.display='none'" class="w3-button w3-hover-indigo w3-display-topright w3-large">x</span>
+            <h3 class="w3-large" style="padding-top: 8px;padding-bottom: 8px">
+                Add Text / Link Material in @Model.ChapterTitle
+            </h3>
+        </div>
+        <div class="w3-container w3-padding-16" id="modelContent">
+            <div class="row smallPaddingTopBottom">
+                <div id="addTextLinkError" class="w3-medium alert alert-danger bolder" style="display:none">
+
+                </div>
+            </div>
+            <div class="row">
+                @using (Html.BeginForm("AddTextMaterial", "TextMaterial", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+                {
+                    @Html.HiddenFor(m => m.Id)
+                    @Html.Hidden("textMaterialId")
+                    <div class="row">
+                        <label>Text / Link</label>
+                    </div>
+                    <div class="row">
+                        @(Html.Kendo()
+                           .Editor()
+                           .Name("textLinkEditor")
+                           .Tools(tools => tools
+                               .Clear()
+                               .Formatting()
+                               .Bold()
+                               .Italic()
+                               .Underline()
+                               .Strikethrough()
+                               .Outdent()
+                               .JustifyLeft()
+                               .JustifyCenter()
+                               .JustifyRight()
+                               .JustifyFull()
+                               .Indent()
+                               .InsertOrderedList()
+                               .InsertUnorderedList()
+                               .CreateLink()
+                               .TableEditing()
+                               .FontColor()
+                               .BackColor()
+                               .InsertImage()
+                           )
+                       .Encode(false)
+                       .StyleSheets(css => css.Add(Url.Content("~/Content/customstyle.css")).Add(Url.Content("~/Content/w3css.css")))
+                       .Resizable(true)
+                       .Value(@<text>
+
+                    </text>)
+                        )
+                    </div>
+                    <div class="row">
+                        <input class="button-indigo" value="Submit" type="submit" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ------------------------ Responsive Template ------------------------ -->
+<script id="responsive-column-template-files-grid" type="text/x-kendo-template">
+    <p class="col-template-val">
+        <a class='link bolder' href='/UploadedFiles/#=FileName#' target='_blank'>#=data.FileName#</a>
+    </p>
+</script>
+<script id="responsive-column-template-text-grid" type="text/x-kendo-template">
+    <p class="col-template-val one-line-text">
+        # var dcontent = Detail.substring(0,25); #
+        #=dcontent#...
+    </p>
+</script>
+<!-- ---------------------- View Detail Window ---------------------- -->
+@(Html.Kendo().Window().Name("DetailsWindow")
+       .Title("Text / Link Material Detail")
+       .Visible(false)
+       .Modal(true)
+       .Draggable(true)
+       .Resizable(r => r.Enabled(true))
+       .Width(370)
+)
+<!-- ---------------------- Detail Window's Content Template ---------------------- -->
+<script type="text/x-kendo-template" id="detailsTemplate">
+    <div id="details-container">
+        <p>
+            #= Detail #
+        </p>
+        <p>
+            <b>Last Updated On:</b> #=data.strLastUpdate#
+        </p>
+    </div>
+</script>
+<script>
+    if ('@TempData["ChapterUpdated"]' != null && '@TempData["ChapterUpdated"]' != "") {
+        displaySuccess("'@TempData["ChapterUpdated"]'");
+    }
+    if ('@TempData["ChapterError"]' != null && '@TempData["ChapterError"]' != "") {
+        displayError("'@TempData["ChapterError"]'");
+    }
+    if ('@TempData["FileUploaded"]' != null && '@TempData["FileUploaded"]' != "") {
+        displaySuccess("'@TempData["FileUploaded"]'");
+    }
+    if ('@TempData["TextMaterialAdded"]' != null && '@TempData["TextMaterialAdded"]' != "") {
+        displaySuccess("'@TempData["TextMaterialAdded"]'");
+    }
+    //for text material input
+    if ('@TempData["TextMaterialEmptyError"]' != null && '@TempData["TextMaterialEmptyError"]' != "") {
+        displayError("'@TempData["TextMaterialEmptyError"]'");
+    }
+    $("#FilesGrid").kendoTooltip({
+        filter: ".k-grid-delete",
+        position: "auto",
+        content: "Delete"       
+    });
+      $("#TextMaterialGrid").kendoTooltip({
+        filter: ".k-grid-Edit",
+        position: "auto",
+        content: function (e) {
+            return "Edit";
+        }
+      });
+     $("#TextMaterialGrid").kendoTooltip({
+        filter: ".k-grid-Destroy",
+        position: "auto",
+        content: function (e) {
+            return "Delete";
+        }
+     });
+     $("#TextMaterialGrid").kendoTooltip({
+        filter: ".k-grid-ViewDetails",
+        position: "auto",
+        content: function (e) {
+            return "View Details";
+        }
+     });
+
+    var resColTemplateFileGrid = kendo.template($("#responsive-column-template-files-grid").html()); //file grid
+    var resColTemplateTextGrid = kendo.template($("#responsive-column-template-text-grid").text());//text or link material grid
+    var detailsTemplate = kendo.template($("#detailsTemplate").html());
+
+    function showDetails(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var wnd = $("#DetailsWindow").data("kendoWindow");
+        wnd.content(detailsTemplate(dataItem));
+        adjustWindowSize(wnd);
+        wnd.center().open();
+    }
+    $( "#uploadFileBtn" ).click(function() {
+        $("#uploadFileModal").show();
+    });
+    $("#addTextLinkBtn").click(function () {
+        $("#addTextLinkModal").show();
+    });
+    function DeleteSelectedTextMaterial(e) {
+        e.preventDefault();
+        if (confirm("Are you sure to delete the text material?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var grid = $("#TextMaterialGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Delete_TextMaterial", "TextMaterial")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (result) {
+                    grid.dataSource.read();
+                    grid.refresh();
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+
+    }
+    function EditSelectedTextMaterial(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var editor = $('#textLinkEditor').data('kendoEditor');
+        editor.value(dataItem.Detail);
+        $("#textMaterialId").val(dataItem.Id);
+        console.log(dataItem.Detail);
+        $("#addTextLinkModal").show();
+    }
+    // ------------------------- Validate File Upload -------------------------
+    function validateFile(e) {
+        $('#uploadFileError').css('display', 'none');
+        var upload = $("#attachments").data("kendoUpload"), files = upload.getFiles();
+        var fileInfo = e.files[0];
+        var wrapper = this.wrapper;
+        $.each(e.files, function () {
+            var currentFileName = this.name;
+            var currentFileUid = this.uid;
+            // check whether the file name contain special characters
+            if (!charCheck(currentFileName)) {
+                $("#uploadFileError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> The filename cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | ' Please rename your file and try again.");
+                $('#uploadFileError').css('display', 'block');
+                e.preventDefault();
+                return;
+            }
+            // check whether file name already exists in database
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ValidateUpload", "FileMaterial")',
+                data: { currentFileName: currentFileName },
+                cache: false,
+                success: function (response) {
+                    if (response) {
+                        alert(response);
+                        $("#uploadFileError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> " + response);
+                        $('#uploadFileError').css('display', 'inline');
+                        $('#uploadFileError').delay(3000).fadeOut(300);
+                        upload.removeFileByUid(currentFileUid);
+                    }
+                }
+            });
+        });
+    }
+    function charCheck(val) {
+        var chars = ['~', '#', '%', '&', '*', '{', '}', '\\', ':', '<', '>', '?', '/', '+', '|', '"', "'"];
+
+        for (var i = 0; i < chars.length; i++) {
+            if (val.indexOf(chars[i]) != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+</script>

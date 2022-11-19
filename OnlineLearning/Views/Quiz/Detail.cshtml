@@ -1,0 +1,163 @@
+﻿@model OnlineLearning.Models.QuizViewModels
+@{
+    ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var teacherUser = User.IsInRole("Teacher");
+    var studentUser = User.IsInRole("Student");
+}
+    <div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.TopNavViewModels.CourseChannelId})"> Quiz List</a></li>
+                @if (studentUser)
+                {
+                    <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","quiz",new { Id = Model.Id})"> Quiz Detail</a></li>
+                }
+                @if (teacherUser)
+                {
+                    <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "studentresult" ? "active-breadcrumb-item" : "")" href="@Url.Action("studentresult","quiz",new { Id = Model.Id})"> @Model.QuizTitle Students' Result</a></li>
+                    <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","quiz",new { Id = Model.Id})"> Quiz Detail</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.TopNavViewModels.CourseChannelId})"> Quiz List</a></li>
+        @if (studentUser)
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","quiz",new { Id = Model.Id})"> Quiz Detail</a></li>
+        }
+        @if (teacherUser)
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "studentresult" ? "active-breadcrumb-item" : "")" href="@Url.Action("studentresult","quiz",new { Id = Model.Id})"> @Model.QuizTitle Students' Result</a></li>
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","quiz",new { Id = Model.Id})"> Quiz Detail</a></li>
+        }
+    </ul>
+</div>
+<div class="row">
+    <div class="w3-card w3-white largePaddingLeftRight w3-padding-16">
+        <h3 class="text-indigo bolder" style="margin:0">@Model.QuizTitle</h3>
+        <div class="row w3-opacity">
+            Last Update by @Model.CreatorName On- <b class="smallPaddingLeftRight">@Html.DisplayFor(m => m.LastUpdate)</b>
+        </div>
+        <div class="row">
+            <span class="col-md-3 padding-0 col-sm-12 col-xs-12">
+                <i class="w3-large glyphicon glyphicon-question-sign text-gold bolder"></i> Total Questions: <b>@Model.TotalQuestion</b>
+            </span>
+            <span class="col-md-4 padding-0 col-sm-12 col-xs-12">
+                <i class="w3-large glyphicon glyphicon-time text-gold bolder"></i>  Due On: <b>@Html.DisplayFor(m => m.DueDateTime)</b>
+            </span>
+            <span class="col-md-5 padding-0 col-sm-12 col-xs-12">
+                <i class="w3-large fa fa-hourglass-half text-gold bolder"></i> Time Remaining: <b>@Model.TimeRemaining</b>
+            </span>
+        </div>
+        <div class="row smallPaddingTopBottom" style="overflow:hidden;text-overflow:ellipsis">
+            @Html.Raw(Model.Instruction)
+        </div>
+        @if (studentUser)
+        {
+            <div class="row">
+                <button id="startQuizBtn" class="button-indigo btn" type="button" onclick="StartQuiz()">Start Quiz</button>
+            </div>
+        }
+    </div>
+</div>
+@if (Model.Answered == true)
+{
+   
+<div class="row w3-padding-16 ">
+    <div class="w3-card w3-white w3-padding-16 largePaddingLeftRight">
+        <h3 class=" bolder text-indigo">Quiz Result</h3>
+        <div class="row">
+            <div class="row">
+                <div class="col-md-2 padding-0 bold">
+                    Student Name:
+                </div>
+                <div class="col-md-10 padding-0">
+                    <a href='@Url.Action("profile","account",new { Id = Model.StudentQuizViewModel.StudentId})' target='_blank'><img src='~/UploadedFiles/@Model.StudentQuizViewModel.ProfilePic' alt='@Model.StudentQuizViewModel.ProfilePic' class='w3-circle' style='width:30px'></a> @Model.StudentQuizViewModel.StudentName
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2 padding-0 bold">
+                    Quiz Answered On:
+                </div>
+                <div class="col-md-10 padding-0">
+                    @Html.DisplayFor(m => m.AnsweredDateTime)
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2 padding-0 bold">
+                    Result:
+                </div>
+                <div class="col-md-10 padding-0">
+                    Answered <b class="w3-text-green bolder w3-xlarge">@Model.CorrectCount</b> Questions Correctly, <b class="w3-text-red bolder w3-xlarge">@Model.WrongCount</b> Questions Wrongly
+                </div>
+            </div>
+        </div>
+
+        @foreach (var question in Model.QuestionList)
+        {
+            <div class="row w3-white w3-padding-16 w3-border-top w3-border-gray">
+                <h4>@question.Question</h4>
+                @foreach (var answer in question.AnswerList)
+                {
+                    if (question.StudentAnswerId == answer.Id)
+                    {
+                        <div class="w3-half w3-margin-bottom">
+                            <span class="width100 background-indigo padding-10 w3-text-white w3-round-medium w3-margin-right">
+                                @answer.AnswerText
+                                @if (answer.IsCorrect == true)
+                                {
+                                    <i class="fa fa-check w3-text-green w3-xlarge"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-remove w3-xlarge" style="color:palevioletred"></i>
+                                }
+                            </span>
+                        </div>
+
+                    }
+                    else
+                    {
+                        <div class="w3-half w3-margin-bottom">
+                            <span class="w3-white width100 text-indigo padding-10 w3-border w3-round-medium w3-margin-right">
+                                @answer.AnswerText
+                                @if (answer.IsCorrect == true)
+                                {
+                                    <i class="fa fa-check w3-text-green w3-xlarge"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-remove w3-xlarge" style="color:palevioletred"></i>
+                                }
+                            </span>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+   
+</div>
+}
+
+
+<script>
+    $(document).ready(function () {
+         if ('@Model.Answered' == 'True' || '@Model.alreadyDue' == 'True') {
+            $("#startQuizBtn").addClass("disabled");
+        }
+    });
+
+
+    function StartQuiz() {
+        if (confirm("Once started the quiz, you cannot re-take the quiz anymore. Are you sure to start now?")) {
+            location.href = '@Url.Action("answerquestion","quiz",new { Id = Model.Id })';
+            $("#startQuizBtn").addClass("disabled");
+        } else {
+            return;
+        }
+    }
+</script>

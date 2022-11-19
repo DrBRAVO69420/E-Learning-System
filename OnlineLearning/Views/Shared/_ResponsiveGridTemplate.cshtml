@@ -1,0 +1,12 @@
+﻿<script id="responsive-column-template" type="text/x-kendo-template">
+    # var myJSON = JSON.stringify(data); # <!--convert to string-->
+    # var jsonObj = JSON.parse(myJSON); # <!--convert to json object-->
+    # for (var key in jsonObj) { #
+    # if (jsonObj.hasOwnProperty(key) && key != 'Id' && key.toLowerCase().indexOf("id") === -1) { # <!--only display own property and ignore the Id property-->
+    # var strKey = key.toString(); var i=0;
+    strKey = strKey.replace(/([A-Z])/g, ' $1').trim();# <!--insert space before capital letter, for example: CategoryTitle become Category Title. use key(variable name) as title, separate to words by the uppercase character-->
+    <strong>#=strKey#</strong> <!--Title-->
+    <p class="col-template-val">#= data[key] #</p> # } #
+    # } #
+
+</script>

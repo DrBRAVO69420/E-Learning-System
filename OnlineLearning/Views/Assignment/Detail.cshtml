@@ -1,0 +1,435 @@
+﻿@model OnlineLearning.Models.AssignmentViewModels
+@{
+    ViewBag.Title = "Assignment Detail";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var teacherUser = User.IsInRole("Teacher");
+    var studentUser = User.IsInRole("Student");
+}
+<style>
+    .k-button .k-button-icontext .k-grid-excel {
+        background-color: #593fc8;
+        color: white;
+        border: 1px solid #593fc8;
+    }  
+</style>
+<div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id = Model.CourseChannelId})"> Assignment List</a></li>
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","assignment",new { Id = Model.Id})"> Assignment Detail</a></li>
+        </ul>
+    </div>
+</div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id = Model.CourseChannelId})"> Assignment List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","assignment",new { Id = Model.Id})"> Assignment Detail</a></li>
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        Assignment Detail
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="w3-white w3-card padding-32 w3-padding-16">
+        @if (Model.DueDate != null)
+        {
+            <div class="row bolder padding-0">
+                <span class="col-md-5 padding-0">
+                    <i class="glyphicon glyphicon-calendar w3-large w3-text-orange"></i> Due On:
+                    <strong class="text-gold w3-large" style="font-family:Poppins">@Html.DisplayFor(x => x.DueDate)  </strong>
+                </span>
+                <span class="col-md-5 padding-0">
+                    <i class="fa fa-hourglass-half w3-large w3-text-orange"></i> Time Remaining:
+                    <strong class="text-gold smallPaddingLeftRight w3-large" style="font-family: Poppins;">@Html.DisplayFor(x => x.TimeRemaining)</strong>
+                </span>
+            </div>
+        }
+        else
+        {
+            <div class="row bolder">
+                <strong class="w3-text-orange" style="font-family:Poppins">No Due Date</strong>
+            </div>
+        }
+
+        <h3 class="bolder text-indigo" style="margin-bottom:0;">@Model.AssignmentTitle</h3>
+        <div class="row w3-opacity-min">
+            <i class="fa fa-user-o"></i> @Model.Type Assignment
+            <span class="smallPaddingLeftRight"><i class="glyphicon glyphicon-time"></i> Last Updated On: @Html.DisplayFor(m => m.LastUpdate)</span>
+            @if (Model.FileName != null)
+            {
+                <span class="smallPaddingLeftRight"><i class="glyphicon glyphicon-file"></i><a class="smallPaddingLeftRight link bolder" href="~/UploadedFiles/@Model.FileName" target="_blank">@Model.FileName</a></span>
+            }
+        </div>
+        <div class="row smallPaddingTopBottom" style="overflow:hidden;text-overflow:ellipsis">
+            @Html.Raw(Model.Instruction)
+        </div>
+    </div>
+</div>
+
+@if (studentUser)
+{
+    <div class="row">
+        <div class="w3-white w3-card padding-32 w3-padding-16">
+            <h3 class="bolder text-indigo padding-0" style="margin-bottom:0px">Submission Status</h3>
+            <div class="w3-padding-16" style="font-size:16px">
+                <div class="row">
+                    <div class="col-md-3 bolder padding-0">
+                        Your Group:
+                    </div>
+                    <div class="col-md-9 padding-0">
+                        @Model.AssignmentGroupViewModels.GroupName
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 bolder padding-0">
+                        Submission status:
+                    </div>
+                    <div class="col-md-9 padding-0">
+                        @if (Model.AssignmentSubmissionViewModels.Status == null)
+                        {
+                            <span class="label label-warning">Not Yet Submit</span>
+                        }
+                        else
+                        {
+                            <span class="label label-success" style="font-size:85%;">@Model.AssignmentSubmissionViewModels.Status</span>
+                        }
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 bolder padding-0">
+                        Grade:
+                    </div>
+                    <div class="col-md-9 padding-0">
+                        @if (Model.AssignmentSubmissionViewModels.Grade == null)
+                        {
+                            <span class="label label-warning">Not Yet Graded</span>
+                        }
+                        else
+                        {
+                            <span class="w3-tag w3-blue w3-round-medium bolder w3-medium" style="padding-bottom:3px">@Model.AssignmentSubmissionViewModels.Grade</span>
+
+                        }
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 bolder padding-0">
+                        Submitted File:
+                    </div>
+                    <div class="col-md-9 padding-0">
+                        <a class="link bolder" href="~/UploadedFiles/@Model.AssignmentSubmissionViewModels.SubmissionFile" target="_blank">@Model.AssignmentSubmissionViewModels.SubmissionFile</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 bolder padding-0">
+                        @Html.LabelFor(m => m.AssignmentSubmissionViewModels.Comment)
+                    </div>
+                    <div class="col-md-9 padding-0">
+                        @Model.AssignmentSubmissionViewModels.Comment
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 bolder padding-0">
+                        Submitted On:
+                    </div>
+                    <div class="col-md-9 padding-0">
+                        @Html.DisplayFor(m => m.AssignmentSubmissionViewModels.SubmissionDate)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 bolder padding-0">
+                        Last Update:
+                    </div>
+                    <div class="col-md-9 padding-0">
+                        @if (Model.AssignmentSubmissionViewModels.LastUpdate == null)
+                        {
+                            <span>-</span>
+                        }
+                        else
+                        {
+                            @Html.DisplayFor(m => m.AssignmentSubmissionViewModels.LastUpdate)
+                        }
+                    </div>
+                </div>
+                @if (Model.Type.Equals("Group"))
+                {
+                    if (Model.AssignmentGroupViewModels.Id == Guid.Empty || Model.AssignmentGroupViewModels.Id == null)
+                    {
+                        <div class="row mediumPaddingTopBottom">
+                            <a class="btn button-indigo disabled" href="@Url.Action("submission","assignment",new { assignmentid = Model.Id})">Add Submission</a>
+                            <a class="btn button-indigo" href="@Url.Action("managegroupmembers","assignment",new { Id = Model.Id})">Manage Group Members</a>
+                        </div>
+                        <div class="row text-danger alert alert-danger">
+                            <i class="glyphicon glyphicon-alert smallPaddingLeftRight"></i> You cannot submit this assignment unless you joined an assignment group.
+                        </div>
+                    }
+                    else
+                    {
+                        if (Model.AssignmentSubmissionViewModels.Id != null && Model.AssignmentSubmissionViewModels.Id != Guid.Empty)
+                        {
+                            if (Model.AssignmentSubmissionViewModels.Grade == null)
+                            {
+                                <div class="row mediumPaddingTopBottom">
+                                    <a class="button-indigo" href="@Url.Action("submission","assignment",new { assignmentid = Model.Id})">Edit Submission</a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="row mediumPaddingTopBottom">
+                                <a class="button-indigo" href="@Url.Action("submission","assignment",new { assignmentid = Model.Id})">Add Submission</a>
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    if (Model.AssignmentSubmissionViewModels.Id != null && Model.AssignmentSubmissionViewModels.Id != Guid.Empty)
+                    {
+                        if (Model.AssignmentSubmissionViewModels.Grade == null && Model.AlreadyDue == false)
+                        {
+                            <div class="row mediumPaddingTopBottom">
+                                <a class="button-indigo" href="@Url.Action("submission","assignment",new { assignmentid = Model.Id})">Edit Submission</a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        if (Model.AlreadyDue == false)
+                        {
+                            <div class="row mediumPaddingTopBottom">
+                                <a class="button-indigo" href="@Url.Action("submission","assignment",new { assignmentid = Model.Id})">Add Submission</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row w3-padding-16">
+                                <span class="alert alert-danger"><i class="glyphicon glyphicon-warning-sign "></i> This assignment's due date is reached, you cannot submit it anymore.</span>
+                            </div>
+                        }
+                    }
+                }
+
+            </div>
+
+        </div>
+    </div>
+}
+
+@(Html.Kendo().Window().Name("GroupMembersListWindow")
+       .Visible(false)
+       .Modal(true)
+       .Draggable(true)
+       .Resizable(r => r.Enabled(true))
+       .Width(370)
+       .HtmlAttributes(new { @style = "padding: 8px 8px" })
+)
+
+@if (teacherUser)
+{
+    <div class="w3-panel sectionHeading">
+        <h3 class="text-indigo bolder">
+            Assignment Submission
+        </h3>
+    </div>
+    <div class="row">
+        @(Html.Kendo().Grid<OnlineLearning.Models.AssignmentSubmissionViewModels>()
+                    .Name("AssignmentSubmissionGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Assignment Submissions").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                        columns.Bound(c => c.Id).Hidden();
+                        if (Model.Type.Equals("Group"))
+                        {
+                            columns.Bound(c => c.GroupName).ClientTemplate("#if(data.GroupName == null){# <span class='label label-warning'>Individual Assignment</span> #}else{# <button class='link bolder w3-transparent w3-border-0' onclick=\"openGroupMembersModal('#=GroupName#','#=AssignmentGroupId#')\">#=GroupName#</button> #}#").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        }
+                        else
+                        {
+                            columns.Bound(c => c.StudentName).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        }
+                        columns.Bound(c => c.strSubmissionDate).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.SubmittedFromDueDate).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.SubmissionFile)
+                                                //.ClientTemplate("<a class='link bolder' href='/UploadedFiles/#=SubmissionFile#' target='_blank'>#=SubmissionFile#</a>")
+                                                .HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.Grade).EditorTemplateName("GradeEditor").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.Comment).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Command(command =>
+                        {
+                            command.Edit().IconClass(" ").Text("<i class='glyphicon glyphicon-pencil edit-btn' style='font-size:18px'></i>").HtmlAttributes(new { @title = "Edit Grade" });
+                        }).Width(150).Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+
+                    })
+.ToolBar(toolbar =>
+{
+    toolbar.Pdf().HtmlAttributes(new { style = "background-color: #593fc8;color: white;border: 1px solid #593fc8;", @class = "w3-hover-opacity" });
+    toolbar.Excel().HtmlAttributes(new { style = "background-color: #593fc8;color: white;border: 1px solid #593fc8;", @class = "w3-hover-opacity" });
+    
+}
+)
+.Pdf(pdf => pdf
+.AllPages()
+.AvoidLinks()
+.PaperSize("A4")
+.Scale(0.8)
+.Date(DateTime.Now)
+.Margin("2cm", "1cm", "1cm", "1cm")
+.Landscape()
+.RepeatHeaders(false)
+.TemplateId("page-template")
+.FileName(@Model.AssignmentTitle + " Assignment Submission.pdf" )
+.ProxyURL(Url.Action("Pdf_Export_Save", "GeneralFunction"))
+)
+.Excel(excel => excel
+.FileName(@Model.AssignmentTitle + " Assignment Submission.xlsx")
+.Filterable(true)
+.AllPages(true)
+.ProxyURL(Url.Action("Excel_Export_Save", "GeneralFunction"))
+)
+.Editable(editable => editable.Mode(GridEditMode.PopUp).TemplateName("GradeAndCommentEditor"))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+    model.Field(p => p.GroupName).Editable(false);
+    model.Field(p => p.StudentName).Editable(false);
+    model.Field(p => p.SubmissionDate).Editable(false);
+    model.Field(p => p.strSubmissionDate).Editable(false);
+    model.Field(p => p.SubmittedFromDueDate).Editable(false);
+    model.Field(p => p.strLastUpdate).Editable(false);
+    model.Field(p => p.LastUpdate).Editable(false);
+    model.Field(p => p.SubmissionFile).Editable(false);
+    model.Field(p => p.Comment).Editable(true);
+    model.Field(p => p.Grade).Editable(true);
+})
+.Read(read => read.Action("Read_AssignmentSubmission", "Assignment", new { AssignmentId = Model.Id }))
+.Update(update => update.Action("Update_AssignmentGrade", "Assignment"))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('AssignmentSubmissionGrid')").Edit("onEditAssignmentSubmission"))
+        )
+    </div>
+}
+
+@(Html.Kendo().Tooltip()
+      .For("#AssignmentSubmissionGrid")
+      .Filter(".forTooltips")
+      .Position(TooltipPosition.Top)
+)
+
+<!-- ---------------------- Template for export to pdf ---------------------- -->
+<script type="x/kendo-template" id="page-template">
+    <div class="page-template" style="font-size:10px">
+        <div class="header">
+            <div style="float: right">Page #: pageNum # of #: totalPages #</div>
+            Assignment Submission
+        </div>
+        <div class="footer">
+            Page #: pageNum # of #: totalPages #
+        </div>
+    </div>
+</script>
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    #if('@Model.Type' == 'Group'){#
+    <p class="col-template-val">
+        #if(data.GroupName == null){#
+        <span class='label label-warning'>Individual Assignment</span>
+        #}
+        else{#
+        <button class='link bolder w3-transparent w3-border-0 padding-0'
+                onclick="openGroupMembersModal('#=GroupName#','#=AssignmentGroupId#')">
+            #=data.GroupName#
+        </button>
+        #}#
+    </p>
+    #}
+    else{#
+    <p class="col-template-val">
+        <b>#=data.StudentName#</b>
+    </p>
+    #}#
+    <p class="col-template-val">Submitted On #=data.strSubmissionDate#</p>
+    <p class="col-template-val">
+        <a class='link bolder' href='/UploadedFiles/#=SubmissionFile#' target='_blank'>#=data.SubmissionFile#</a>
+    </p>
+    #if(data.Grade == null){#
+    <p class="col-template-val">
+        <span class="label label-warning">Not Yet Graded</span>
+    </p>
+    #}
+    else{#
+    <p class="col-template-val">
+        <b>Grade:</b> #=data.Grade#
+    </p>
+    #}#
+
+    #if(data.Comment == null){#
+    <p class="col-template-val">
+        <span class="label label-warning">Not Yet Commented</span>
+    </p>
+    #}
+    else{#
+    <p class="col-template-val">
+        <b>Comment:</b> #=data.Comment#
+    </p>
+    #}#
+
+
+</script>
+
+<script>
+
+    if ('@TempData["AssignmetSubmitted"]' != null && '@TempData["AssignmetSubmitted"]' != "") {
+        displaySuccess("'@TempData["AssignmetSubmitted"]'");
+    }
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    function onEditAssignmentSubmission(e) {
+        adjustWindowSize(e.container.data("kendoWindow"));
+        e.container.data("kendoWindow").center().open();
+        // if user click add edit button, set pop up window title = Update 'role name'
+        if (!e.model.isNew()) {
+            e.container.data("kendoWindow").title("Update Grade & Comment");
+        }
+    }
+     $("#AssignmentSubmissionGrid").kendoTooltip({
+        filter: ".k-grid-edit",
+        position: "auto",
+        content: "Edit"       
+    });
+   
+    function openGroupMembersModal(groupName, AssignmentGroupId) {
+        $.ajax({
+            url: '@Url.Action("GetGroupMembers", "Assignment")',
+            type: "GET",
+            data: {Id: AssignmentGroupId},
+            success: function (result) {
+                var wnd = $("#GroupMembersListWindow").data("kendoWindow");
+                wnd.title(groupName + " Group Members");
+                wnd.content(iterate(result));
+                adjustWindowSize(wnd);
+                wnd.center().open();
+            }
+        });
+    }
+</script>

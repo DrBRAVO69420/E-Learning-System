@@ -1,0 +1,52 @@
+﻿@model OnlineLearning.Models.AnnouncementViewModel
+@{
+    ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+
+    <div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "coursechannel" ? "active-breadcrumb-item" : "")" href="@Url.Action("coursechannel","announcement",new {Id =Model.TopNavViewModels.CourseChannelId  })"> Announcement List</a></li>
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="/announcement/detail/@Model.Id"> Announcement Detail</a></li>
+            </ul>
+        </div>
+    </div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "coursechannel" ? "active-breadcrumb-item" : "")" href="@Url.Action("coursechannel","announcement",new {Id =Model.TopNavViewModels.CourseChannelId  })"> Announcement List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","announcement",new {Id =Model.Id  })"> Announcement Detail</a></li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12 w3-white w3-card mediumPaddingLeftRight w3-padding-16">
+        <div class="row">
+            <div class="col-md-1">
+                <a href="@Url.Action("profile","account",new {Id =Model.CreatorId  })" target="_blank"><img src="~/UploadedFiles/@Model.CreatorProfilePic" alt="profilePic" class="img-circle gold-border" style="width:60px" /></a>
+            </div>
+            <div class="col-md-11">
+                <div class="row w3-large">
+                    @Model.CreatorName
+                </div>
+                <div class="row">
+                    Last Update on  @Html.DisplayFor(m => m.LastUpdate)
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-1">
+
+            </div>
+            <div class="col-md-11">
+                <h2 class="text-indigo bolder">
+                    @Model.TitleText
+                </h2>
+                <div class="w3-large" style="overflow:hidden;text-overflow:ellipsis">
+                    @Html.Raw(Model.Details)
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>

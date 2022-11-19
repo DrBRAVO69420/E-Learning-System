@@ -1,0 +1,233 @@
+﻿@model OnlineLearning.Models.QuizQuestionViewModels
+@{
+    ViewBag.Title = "Create / Edit Question";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var count = 1;
+}
+<style>
+    .image-preview {
+        position: relative;
+        vertical-align: top;
+        height: 45px;
+    }
+</style>
+<div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.TopNavViewModels.CourseChannelId})"> Quiz List</a></li>
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "questionlist" ? "active-breadcrumb-item" : "")" href="@Url.Action("questionlist","quiz",new { Id = Model.QuizId})"> @Model.QuizDetail.QuizTitle Question List</a></li>
+            @if (Model.Id == null || Model.Id == Guid.Empty)
+            {
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquestion" ? "active-breadcrumb-item" : "")"> Add Question & Answer</a></li>
+            }
+            else
+            {
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquestion" ? "active-breadcrumb-item" : "")"> Edit Question & Answer</a></li>
+            }
+        </ul>
+    </div>
+</div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.TopNavViewModels.CourseChannelId})"> Quiz List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "questionlist" ? "active-breadcrumb-item" : "")" href="@Url.Action("questionlist","quiz",new { Id = Model.QuizId})"> @Model.QuizDetail.QuizTitle Question List</a></li>
+        @if (Model.Id == null || Model.Id == Guid.Empty)
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquestion" ? "active-breadcrumb-item" : "")"> Add Question & Answer</a></li>
+        }
+        else
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editquestion" ? "active-breadcrumb-item" : "")"> Edit Question & Answer</a></li>
+        }
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    @if (Model.Id == null || Model.Id == Guid.Empty)
+    {
+        <h3 class="text-indigo bolder">Add Question & Answer for @Model.QuizDetail.QuizTitle</h3>
+    }
+    else
+    {
+        <h3 class="text-indigo bolder">Edit Question & Answer for @Model.QuizDetail.QuizTitle</h3>
+    }
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top" style="padding-bottom: 50px">
+    <div class="w3-padding-16">
+        @using (Html.BeginForm("EditQuestion", "Quiz", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.QuizDetail.QuizTitle)
+            @Html.HiddenFor(m => m.QuizDetail.CourseChannelId)
+            @Html.HiddenFor(m => m.QuizDetail.Instruction)
+            @Html.HiddenFor(m => m.QuizDetail.QuizTitle)
+            @Html.HiddenFor(m => m.QuizId)
+            <div class="panel panel-default">
+                <div class="panel-heading"><h4 class="text-indigo bolder">Question</h4></div>
+                <div class="panel-body">
+                    @if (Model.AttachedImage != null)
+                    {
+                        <div class="row">
+                            <div class="col-md-3">
+                               <a class="link bolder" href="~/UploadedFiles/@Model.AttachedImage" target="_blank"><img class="img-responsive width100" src="~/UploadedFiles/@Model.AttachedImage" /></a> 
+                            </div>
+                        </div>
+                    }
+                    <div class="row">
+                        @Html.LabelFor(m => m.Question, new { @class = "required" })
+                    </div>
+                    <div class="row">
+                        @Html.Kendo().TextBoxFor(m => m.Question)
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.Question, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="row">
+                        @Html.LabelFor(m => m.AttachedImage)
+                    </div>
+                    <div class="row">
+                        @(Html.Kendo().Upload()
+                                    .Name("attachments")
+                                    .Multiple(false)
+                                    .Messages(m => m.Select("Select Image"))
+                                    .HtmlAttributes(new { aria_label = "files" })
+                                    .Validation(validation => validation
+                                    .AllowedExtensions(new string[] { ".jpeg", ".bmp", ".png", ".jpg" })
+                                    .MaxFileSize(5000000)
+                                    )
+                                    .Events(e => e.Select("validateFile"))
+                        )
+                    </div>
+                    <div id="addQuestionError" class="row w3-medium alert alert-danger bolder" style="display:none">
+
+                    </div>
+                    <div class="row w3-medium w3-text-dark-gray smallPaddingTopBottom">
+                        <i class="glyphicon glyphicon-info-sign"></i> Only 1 image is allowed. <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> New uploaded image will replace the old uploaded image. <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> Maximum File Size is 5 MB. <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> File name cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | '<br />
+                    </div>
+                </div>
+            </div>
+
+            <div id="answerSection">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="text-indigo bolder">Answer</h4>
+                        <p class="bold">
+                            Please add at least two answer options.
+                            (The orders of answers are not important, they will be randomized for each student.)
+                        </p>
+                    </div>
+                    <div class="panel-body">
+                        @for (var i = 0; i < Model.AnswerList.Count; i++)
+                        {
+                            var option = i + 1;
+                            @Html.HiddenFor(x => x.AnswerList[i].Id)
+                            <div class="row">
+                                <label>Answer Option @option</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 padding-0 smallPaddingLeftRight">
+                                    @Html.Kendo().TextBoxFor(x => x.AnswerList[i].AnswerText)
+                                </div>
+                                <div class="col-md-6 padding-0 smallPaddingLeftRight">
+                                    @Html.Kendo().RadioButton().Name("CorrectAnswer").Value(@i).Label("Is Correct")
+                                </div>
+                            </div>
+                            <div class="row">
+                                @Html.ValidationMessageFor(x => x.AnswerList[i].AnswerText, "", new { @class = "text-danger" })
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="row w3-padding-16 text-center">
+                <span class="smallPaddingLeftRight">
+                    <a href="@Url.Action("questionlist","quiz",new { Id = Model.QuizId})" class="btn w3-white w3-border-indigo w3-hover-opacity w3-round-large btn-lg">Back</a>
+                </span>
+                <span class="smallPaddingLeftRight">
+                    <input class="btn btn-lg button-indigo" value="Submit" type="submit" />
+                </span>
+
+
+            </div>
+        }
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    if ('@TempData["AnswerEmpty"]' != null && '@TempData["AnswerEmpty"]' != "") {
+        displayError("'@TempData["AnswerEmpty"]'");
+    }
+       if ('@TempData["AnswerDuplicate"]' != null && '@TempData["AnswerDuplicate"]' != "") {
+        displayError("'@TempData["AnswerDuplicate"]'");
+    }
+       if ('@TempData["CorrectAnswerEmpty"]' != null && '@TempData["CorrectAnswerEmpty"]' != "") {
+        displayError("'@TempData["CorrectAnswerEmpty"]'");
+    }
+    // ------------------------- Validate File Upload -------------------------
+    function validateFile(e) {
+        $('#addQuestionError').css('display', 'none');
+        var upload = $("#attachments").data("kendoUpload"), files = upload.getFiles();
+        var fileInfo = e.files[0];
+        var wrapper = this.wrapper;
+        $.each(e.files, function () {
+            var currentFileName = this.name;
+            var currentFileUid = this.uid;
+            // check whether the file name contain special characters
+            if (!charCheck(currentFileName)) {
+                $("#addQuestionError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> The filename cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | ' Please rename your file and try again.");
+                $('#addQuestionError').css('display', 'block');
+                e.preventDefault();
+                return;
+            }
+            // check whether file name already exists in database
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ValidateUpload", "Quiz")',
+                data: { currentFileName: currentFileName },
+                cache: false,
+                success: function (response) {
+                    if (response) {
+                        $("#addQuestionError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> " + response);
+                        $('#addQuestionError').css('display', 'block');
+                        $('#addQuestionError').delay(3000).fadeOut(300);
+                        upload.removeFileByUid(currentFileUid);
+                    }
+                    else {
+                        var raw = fileInfo.rawFile;
+                        var reader = new FileReader();
+                        if (raw) {
+                            reader.onloadend = function () {
+                            var preview = $("<img class='image-preview'>").attr("src", this.result);
+                            wrapper.find(".k-file[data-uid='" + fileInfo.uid + "'] .k-file-extension-wrapper")
+                              .replaceWith(preview);
+                          };
+                          reader.readAsDataURL(raw);
+                        }
+                        return null;
+                    }
+                }
+            });
+        });
+    }
+    function charCheck(val) {
+        var chars = ['~', '#', '%', '&', '*', '{', '}', '\\', ':', '<', '>', '?', '/', '+', '|', '"', "'"];
+
+        for (var i = 0; i < chars.length; i++) {
+            if (val.indexOf(chars[i]) != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+</script>

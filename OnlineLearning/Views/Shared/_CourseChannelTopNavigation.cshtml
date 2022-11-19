@@ -1,0 +1,280 @@
+﻿
+<style>
+    /*.activeNav {
+        color: #593fc8;
+        font-weight: 900;
+        border-bottom: 6px solid #50bba1;
+        font-family: "Poppins";
+        background-color: #fafafa;
+    }*/
+    #coverImg {
+        height: 300px;
+    }
+
+    #changeImgBtn {
+        font-size: 17px;
+    }
+
+  
+
+    @@media (max-width:420px) {
+        #coverImg {
+            height: 150px;
+        }
+
+        #changeImgBtn {
+            font-size: 12px;
+            padding: 5px;
+        }
+
+        #courseTitle {
+            font-size: 23px;
+        }
+    }
+</style>
+<nav class="navbar w3-center w3-white text-indigo padding-0 w3-hide-large" data-spy="affix" data-offset-top="30">
+    <div class="container-fluid">
+        <a href="@Url.Action("manage","coursechannel",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 col-xs-2 tablink nav-item text-indigo w3-padding  one-line-text  @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "manage" ? "activeNav" : "")"><i class="glyphicon glyphicon-home"></i></div>
+        </a>
+        <a href="@Url.Action("coursechannel","announcement",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 col-xs-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "announcement" ? "activeNav" : "")"><i class="glyphicon glyphicon-bullhorn"></i></div>
+        </a>
+        <a href="@Url.Action("list","assignment",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 col-xs-2 tablink nav-item text-indigo w3-padding one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "assignment" ? "activeNav" : "")"><i class="glyphicon glyphicon-list"></i></div>
+        </a>
+        <a href="@Url.Action("list","quiz",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 col-xs-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "quiz" ? "activeNav" : "")"><i class="glyphicon glyphicon-question-sign"></i></div>
+        </a>
+        <a href="@Url.Action("studentlist","coursechannel",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 col-xs-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "studentlist" ? "activeNav" : "")"><i class="glyphicon glyphicon-user"></i></div>
+        </a>
+        <a href="@Url.Action("list","thread",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 col-xs-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "thread" ? "activeNav" : "")"><i class="glyphicon glyphicon-comment"></i></div>
+        </a>
+    </div>
+</nav>
+
+
+<div class="row" style="padding-bottom:0">
+    <!-- ---------------------------- Cover Image ---------------------------- -->
+    <div id="titleBackground" class="row" style="padding:0px;">
+        <div class="row text-center">
+            <h2 id="courseTitle" class="text-center bolder mediumPaddingLeftRight" style="margin-bottom:5px">
+                <b>@Model.TopNavViewModels.CourseChannelName</b>
+            </h2>
+            @if (ViewContext.HttpContext.User.IsInRole("Student"))
+            {
+                <div class="row text-center">
+                    <button type="button" onclick="UnenrollStudent()" class="button-indigo small padding-5"><i class="glyphicon glyphicon-log-out"></i> Unenroll me</button>
+                </div>
+            }
+            @if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+            {
+                <div class="row text-center">
+                    <button type="button" onclick="openEnrollLink()" class="button-indigo small padding-5" style="margin:2px"><i class="glyphicon glyphicon-paperclip"></i> Get Enroll Link</button>
+                    <button type="button" onclick="deleteCourseChannel()" class="button-indigo small padding-5" style="margin:2px"><i class="glyphicon glyphicon-trash"></i> Delete this Course Channel</button>
+                </div>
+            }
+            <div id="processingTeacherAction" class="row text-center small-margin-top small-margin-bottom" style="display:none;">
+                <span  class="w3-large alert alert-info bolder w3-padding-16" >
+                    <i class="fa fa-spinner w3-spin"></i> Processing ..........
+                </span>
+            </div>
+        </div>
+        <div class="w3-display-container">
+            <img src="@Model.TopNavViewModels.ImageSource" class="img-responsive" id="coverImg" style="width: 100%" />
+            @*<img src="~/CourseChannelTheme/1800-art.png" class="img-responsive" />*@
+            @if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+            {
+                <span id="changeImgBtn" onclick="selectCoverImage()"
+                      class="button-white w3-hover-black w3-hover-text-white w3-round-medium w3-display-topright"
+                      style="color:indigo">
+                    <i class="glyphicon glyphicon-pencil"></i> Change Cover Image
+                </span>
+            }
+        </div>
+    </div>
+    <!-- ---------------------------- Navigation ---------------------------- -->
+    <div class="w3-row w3-center w3-white text-indigo w3-hide-small w3-hide-medium w3-card">
+        <a href="@Url.Action("manage","coursechannel",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 tablink nav-item text-indigo w3-padding  one-line-text  @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "manage" ? "activeNav" : "")"><i class="glyphicon glyphicon-home"></i> Home</div>
+        </a>
+        <a href="@Url.Action("coursechannel","announcement",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "announcement" ? "activeNav" : "")"><i class="glyphicon glyphicon-bullhorn"></i> Announcements</div>
+        </a>
+        <a href="@Url.Action("list","assignment",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 tablink nav-item text-indigo w3-padding one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "assignment" ? "activeNav" : "")"><i class="glyphicon glyphicon-list"></i> Assignments</div>
+        </a>
+        <a href="@Url.Action("list","quiz",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "quiz" ? "activeNav" : "")"><i class="glyphicon glyphicon-question-sign"></i> Quiz</div>
+        </a>
+        <a href="@Url.Action("studentlist","coursechannel",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "studentlist" ? "activeNav" : "")"><i class="glyphicon glyphicon-user"></i> Students</div>
+        </a>
+        <a href="@Url.Action("list","thread",new { Id = Model.TopNavViewModels.CourseChannelId })">
+            <div class="col-md-2 tablink nav-item text-indigo w3-padding  one-line-text @(ViewContext.RouteData.Values["Controller"].ToString() == "thread" ? "activeNav" : "")"><i class="glyphicon glyphicon-comment"></i> Discussion</div>
+        </a>
+    </div>
+
+</div>
+<div class="modal fade" id="unenrollSuccessModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content background-indigo-black">
+            <div class="row">
+                <button type="button" class="close w3-text-white" data-dismiss="modal" style="padding:15px;color:lightgray">&times;</button>
+            </div>
+            <div class="row">
+                <div class="modal-body text-center">
+                    <!--icon-->
+                    <div class="row">
+                        <i class="glyphicon glyphicon-ok-circle" style="font-size:50px;color:greenyellow"></i>
+                    </div>
+                    <!--header-->
+                    <div class="row paddingTopBottom" style="color:greenyellow">
+                        <b style="font-size:20px">Success!</b>
+                    </div>
+                    <!--body-->
+                    <div class="row" style="color:white">
+                        <p>
+                            Unenrolled Successfully!
+                        </p>
+                    </div>
+                    <!--close button-->
+                    <div class="row" style="padding:10px 2px 25px 2px">
+                        <a class="button-indigo" href="@Url.Action("student","home")">Close</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteCourseChannelSuccessModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content background-indigo-black">
+            <div class="row">
+                <button type="button" class="close w3-text-white" data-dismiss="modal" style="padding:15px;color:lightgray">&times;</button>
+            </div>
+            <div class="row">
+                <div class="modal-body text-center">
+                    <!--icon-->
+                    <div class="row">
+                        <i class="glyphicon glyphicon-ok-circle" style="font-size:50px;color:greenyellow"></i>
+                    </div>
+                    <!--header-->
+                    <div class="row paddingTopBottom" style="color:greenyellow">
+                        <b style="font-size:20px">Success!</b>
+                    </div>
+                    <!--body-->
+                    <div class="row" style="color:white">
+                        <p>
+                            Course Channel Deleted Successfully!
+                        </p>
+                    </div>
+                    <!--close button-->
+                    <div class="row" style="padding:10px 2px 25px 2px">
+                        <a class="button-indigo" href="@Url.Action("list","coursechannel")">Close</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="getEnrollLinkModal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-zoom">
+        <div class="w3-container w3-display-container background-indigo w3-text-white w3-medium">
+            <span id="modalClose" onclick="document.getElementById('getEnrollLinkModal').style.display='none'" class="w3-button w3-hover-indigo w3-display-topright w3-large">x</span>
+            <h3 id="modalHeading" class="w3-large" style="padding-top:8px;padding-bottom:8px">Enroll Link for @Model.TopNavViewModels.CourseChannelName</h3>
+        </div>
+        <div class="w3-container w3-padding-16" id="modelContent">
+            <p id="urlText"></p>
+            <div class="row text-center w3-padding-16">
+                <button class="button-indigo padding-5" type="button" onclick="CopyLink()"><i class="glyphicon glyphicon-duplicate"></i> Copy Link</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Link Copied Modal-->
+<div id="linkCopiedModal" class="w3-modal">
+    <div class="w3-modal-content  ">
+        <div class="w3-container">
+            <span onclick="document.getElementById('linkCopiedModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+            <div class="padding-32">
+                <p class="text-center text-success"><i class="fa fa-check-circle w3-xxxlarge"></i></p>
+                <p class="text-center">Link Copied to Clipboard.</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectCoverImage() {
+        @*location.href = "/coursechannel/selectcoverimage/" + '@Model.TopNavViewModels.CourseChannelId' ;*@
+        location.href = "@Url.Action("selectcoverimage","coursechannel",new { Id = Model.TopNavViewModels.CourseChannelId })";
+    }
+    var origin = window.location.origin;
+    @*var path = "/coursechannel/enroll/" + '@Model.TopNavViewModels.CourseChannelId';*@
+    var path = "@Url.Action("enroll","coursechannel",new { Id = Model.TopNavViewModels.CourseChannelId })";
+    var fullEnrollUrl = origin + path;
+    function openEnrollLink() {
+        $("#getEnrollLinkModal").show();
+        $("#urlText").text(fullEnrollUrl);
+    }
+    function CopyLink() {
+        $("#getEnrollLinkModal").hide();
+        CopyToClipboard(path);
+    }
+    function UnenrollStudent() {
+        if (confirm("All your quizzes, assignment submissions, assignment groups, discussion topics, and replies will also be deleted and cannot be recovered. Are you sure to unenroll yourself from the course?")) {
+             $('#processingTeacherAction').css('display', 'inline-block');
+            $.ajax({
+                url: '@Url.Action("UnEnroll", "CourseChannel")',
+                data: { studentId: '', courseChannelId: '@Model.TopNavViewModels.CourseChannelId' },
+                type: "GET",
+                success: function (errorMsg) {
+                    $("#processingTeacherAction").hide();
+                    if (errorMsg == "") {
+                        //displaySuccess("Unenroll Successfully!");
+                        //location.href = "/home/student";
+                        $('#unenrollSuccessModal').modal('show');
+                    }
+                },
+                error: function (errorMsg) {
+                    $("#processingTeacherAction").hide();
+                    displayError(errorMsg);
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function deleteCourseChannel() {
+        if (confirm("All the quizzes, assignment, announcement, discussion topics will also be deleted and cannot be recovered. Are you sure to delete this course channel?")) {
+             $('#processingTeacherAction').css('display', 'inline-block');
+            $.ajax({
+                url: '@Url.Action("Delete_CourseChannel", "CourseChannel")',
+                data: {  Id: '@Model.TopNavViewModels.CourseChannelId' },
+                type: "GET",
+                success: function (errorMsg) {
+                    $("#processingTeacherAction").hide();
+                    if (errorMsg == "") {
+                        //displaySuccess("Unenroll Successfully!");
+                        //location.href = "/home/student";
+                        $('#deleteCourseChannelSuccessModal').modal('show');
+                    }
+                },
+                error: function (errorMsg) {
+                    $("#processingUnenroll").hide();
+                    displayError(errorMsg);
+                }
+            });
+        } else {
+            return;
+        }
+    }
+</script>

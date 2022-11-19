@@ -1,0 +1,510 @@
+﻿@model OnlineLearning.Models.UserViewModel
+@{
+    ViewBag.Title = "Manage Users";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+<!-- ---------------------- Heading ---------------------- -->
+<div class="row">
+    <div class="row">
+        <div class="w3-panel sectionHeading">
+            <h3 class="text-indigo bolder">
+                <i class="glyphicon glyphicon-user"></i> Manage Users
+                <a class="link w3-small" style="cursor: pointer" onclick="document.getElementById('manageUserManual').style.display='block'">View User Manual</a>
+            </h3>
+        </div>
+    </div>
+</div>
+<!-- ---------------------- 3 Role---------------------- -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color:#c7a4ca;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-cog w3-xlarge"></i></div>
+            <div class="w3-right">
+                <h1 style="margin:0">@Model.TotalAdmin</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h5 style="margin-top:3px;margin-bottom:0px">@Html.LabelFor(m => m.TotalAdmin)</h5>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color: #f0f0df;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-blackboard w3-xlarge"></i></div>
+            <div class="w3-right">
+                <h1 style="margin:0">@Model.TotalTeacher</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h5 style="margin-top:3px;margin-bottom:0px">@Html.LabelFor(m => m.TotalTeacher)</h5>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="w3-card w3-container w3-padding-16" style="background-color:#b6ccb1;color:#0a1210;">
+            <div class="w3-left"><i class="	glyphicon glyphicon-education w3-xlarge"></i></div>
+            <div class="w3-right">
+                <h1 style="margin:0">@Model.TotalStudent</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h5 style="margin-top:3px;margin-bottom:0px">@Html.LabelFor(m => m.TotalStudent)</h5>
+        </div>
+    </div>
+</div>
+<!-- ---------------------- 4 User Types Filter ---------------------- -->
+<div class="row">
+    <div id="allUserBtn" onclick="onFilterUserStatus('All')" type="button" class=" col-md-3 w3-hover-opacity-off pointer-cursor " data-toggle="tooltip" data-placement="top" title="All users including newly registered, approved, and disabled login instructor, student and admin">
+        <div class="w3-container w3-white w3-card w3-text-orange smallPaddingTopBottom">
+            <div class="w3-left"><i class="fa fa-users w3-xxlarge"></i></div>
+            <div class="w3-right">
+                <h3 id="alluserCount">@Model.AllUserCount</h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4 class="w3-left" style="padding:0">All Users</h4>
+        </div>
+    </div>
+    <div id="newUserBtn" onclick="onFilterUserStatus('New')" type="button" class="col-md-3 w3-opacity-max w3-hover-opacity-off pointer-cursor" data-toggle="tooltip" data-placement="top" title="Newly registered users (instructor/student) that haven't been approved">
+        <div class="w3-container w3-white w3-card w3-text-blue smallPaddingTopBottom">
+            <div class="w3-left"><i class="fa fa-child w3-xxlarge"></i></div>
+            <div class="w3-right">
+                <h3 id="newuserCount">@Model.NewUserCount</h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4 class="w3-left">New Registered</h4>
+        </div>
+    </div>
+    <div id="approvedUserBtn" onclick="onFilterUserStatus('Approved')" type="button" class="col-md-3 w3-opacity-max w3-hover-opacity-off pointer-cursor" data-toggle="tooltip" data-placement="top" title="Users that already approved by admin, including all admin users (admin user is in 'Approved' category automatically)">
+        <div class="w3-container w3-white w3-card w3-text-teal smallPaddingTopBottom">
+            <div class="w3-left"><i class="	fa fa-check w3-xxlarge"></i></div>
+            <div class="w3-right">
+                <h3 id="approveduserCount">@Model.ApprovedUserCount</h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4 class="w3-left">Approved</h4>
+        </div>
+    </div>
+    <div id="disabledUserBtn" onclick="onFilterUserStatus('Disabled')" type="button" class="col-md-3 w3-opacity-max w3-hover-opacity-off pointer-cursor" data-toggle="tooltip" data-placement="top" title="Users who are disabled login because he or she is graduated or quit the job. Admin can consider delete these users after the user graduated or quit job for more than few years.">
+        <div class="w3-container w3-white w3-card w3-text-red smallPaddingTopBottom">
+            <div class="w3-left"><i class="fa fa-close w3-xxlarge"></i></div>
+            <div class="w3-right">
+                <h3 id="disableduserCount">@Model.DisabledLoginUserCount</h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4 class="w3-left">Disabled Login</h4>
+        </div>
+    </div>
+</div>
+<!-- ---------------------- Success / Error Message ---------------------- -->
+<div class="row text-center padding-0" id="successErrorMsgRow">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+    <span id="progressSpin" class="w3-medium alert alert-info w3-padding-16" style="display:none">
+        <i class="fa fa-spinner w3-spin"></i> Processing ......
+    </span>
+</div>
+<!-- ---------------------- Table List ---------------------- -->
+<div class="row small-margin-top">
+    <div class="w3-card w3-white smallPaddingLeftRight">
+        <div class="row">
+            @Html.Partial("~/Views/Shared/_SearchBarAndResetButton.cshtml", new ViewDataDictionary { { "GridId", "UserGrid" }, { "SearchPlaceHolder", "Search Username / Name / Email / Role / Status / ID" } })
+        </div>
+        @(Html.Kendo().Grid<OnlineLearning.Models.UserViewModel>
+        ()
+        .Name("UserGrid")
+        .Columns(columns =>
+        {
+            columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Users").Media("(max-width: 920px)"); //display this layout when device's width less than 420px
+columns.Bound(c => c.Id).Hidden();
+columns.Bound(c => c.Username).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 920px)");
+columns.Bound(c => c.Name).ClientTemplate("<div><a href='" +
+    Url.Action("profile", "account") +
+    "/#=data.Id#' target='_blank'>#=data.Name#</a></div>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 920px)");
+columns.Bound(c => c.Email).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 920px)");
+columns.Bound(c => c.Role).Filterable(filterable => filterable.UI("UserRoleFilter").Operators(operators => operators.ForString(str => str.Clear().IsEqualTo("Is equal to")))).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 920px)");
+columns.Bound(c => c.RegisteredOn).Filterable(false).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 920px)");
+columns.Bound(c => c.UserStatus).ClientTemplate("#if(data.UserStatus=='New'){# <span class='label label-info'>#=UserStatus#</span> #}# #if(data.UserStatus=='Disabled'){# <span class='label label-danger'>#=UserStatus#</span> #}# #if(data.UserStatus=='Approved'){# <span class='label label-success'>#=UserStatus#</span> #}#")
+.Filterable(filterable => filterable.UI("UserStatusFilter")
+.Operators(operators => operators
+.ForString(str => str.Clear()
+.IsEqualTo("Is equal to")
+))).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 920px)");
+columns.Command(command =>
+{
+command.Custom("Approve").IconClass(" ").Text("<i class='fa fa-check-square-o approve-btn' style='font-size:18px'></i>").Click("ApproveUserRegistration").HtmlAttributes(new { id = "ApproveBtn" });
+command.Custom("Reject").IconClass(" ").Text("<i class='fa fa-ban reject-btn' style='font-size:18px'></i>").Click("RejectUserRegistration").HtmlAttributes(new { id = "RejectBtn" });
+command.Custom("EditUser").IconClass(" ").Text("<i class='glyphicon glyphicon-edit password-btn' style='font-size:18px'></i>").Click("EditSelectedUser");
+command.Custom("Disabled").IconClass(" ").Text("<i class='fa fa-power-off disable-btn' style='font-size:18px'></i>").Click("DisableUserLogin").HtmlAttributes(new { id = "DisabledBtn" });
+command.Custom("Delete").IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").Click("DeleteSelectedUser").HtmlAttributes(new { id = "DeleteBtn" });
+command.Custom("ViewDetails").Text("<i class='glyphicon glyphicon-eye-open detail-btn' style='font-size:18px'></i>").Click("showDetails");
+}).Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+})
+.ToolBar(toolbar =>
+    {
+toolbar.Custom().Action("adduser", "account").IconClass("k-icon k-i-plus").Text("Add New Instructor/Student").HtmlAttributes(new { @class = "button-indigo" });
+toolbar.Custom().Action("addadmin", "account").IconClass("k-icon k-i-plus").Text("Add New Admin").HtmlAttributes(new { @class = "button-indigo" });
+}
+)
+.Editable(editable => editable.DisplayDeleteConfirmation("Deleting category also delete all the FAQs which are associated with it. All of them could not be recovered. Are you sure to continue delete this record?").ConfirmDelete("Deleting category also delete all the FAQs which are associated with it. All of them could not be recovered. Are you sure to continue delete this record? "))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_User", "Account"))
+.Events(e => e.RequestEnd("onRequestEnd"))
+).Events(e => e.DataBound("onDataBoundGrid"))
+        )
+    </div>
+
+</div>
+
+<!-- ---------------------- User manual ---------------------- -->
+<div id="manageUserManual" class="w3-modal">
+    <div class="w3-modal-content w3-animate-zoom">
+        <div class="w3-container w3-display-container background-indigo w3-text-white w3-medium">
+            <span id="modalClose" onclick="document.getElementById('manageUserManual').style.display='none'" class="w3-button w3-hover-indigo w3-display-topright w3-large">x</span>
+            <h3 id="modalHeading" class="w3-large" style="padding-top:8px;padding-bottom:8px">@ViewBag.Title- Detail Features and Functions</h3>
+        </div>
+        <div class="w3-container w3-padding-16" id="modelContent">
+            <b>Special for this section:</b> (Tips: Press CTRL + F to search for a specific word)
+            <ul>
+                <li>
+                    <img src="~/Assest/userStatusManual.png" class="img-responsive" />
+                    Hover on each category (New Registered, Approved, Disabled Login) button to see what is the meaning of each category.
+                </li>
+                <li>
+                    If an instructor or admin have quit the job, or a student have been graduated, admins are advised to do the following:
+                    <ul>
+                        <li>
+                            Disable the user to login, by clicking on the "Power Off" <i class="fa fa-power-off disable-btn"></i> icon on the specific user,
+                            in this case the user's data is still in the database and can be tracked, but he or she cannot login to the portal.
+                        </li>
+                        <li>
+                            After the user has been disabled login for a long period (e.g. a few years) and his/her data is no longer needed, admin can delete the user's data
+                            from database by clicking on the "Trash bin" <i class="glyphicon glyphicon-trash delete-btn"></i> icon on the specific user.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    Approve button <i class="fa fa-check-square-o approve-btn"></i> and Reject button <i class="fa fa-ban reject-btn"></i> are disabled when the user is not a new user.
+                </li>
+                <li>
+                    Disable button <i class="fa fa-power-off disable-btn"></i> is gray out and unable to be clicked when the user is the the login user OR
+                    the user is not an <span class="label label-success">Approved</span> user.
+                    This is to prevent an admin user from accidentally disable login himself/herself, and Admin can only disable an approved user from login to the portal.
+                </li>
+                <li>
+                    Delete button <i class="glyphicon glyphicon-trash delete-btn"></i> is disabled when the user is the the login user.
+                    This is to prevent an admin user from accidentally delete or disable login himself/herself.
+                </li>
+                <li>Upon approving a user registration request, an email will send to the user so that he or she can know and login.</li>
+                <li>
+                    Upon rejecting a user registration request, an email will send to the
+                    user to inform him or her and the user will be deleted from the database automatically.
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- ---------------------- View Detail Window ---------------------- -->
+@(Html.Kendo().Window().Name("DetailsWindow")
+       .Title("User Details")
+       .Visible(false)
+       .Modal(true)
+       .Draggable(true)
+       .Resizable(r => r.Enabled(true))
+       .Width(370)
+)
+<!-- ---------------------- Detail Window's Content Template ---------------------- -->
+<script type="text/x-kendo-template" id="detailsTemplate">
+    <div id="details-container">
+        <dl>
+            <dt>Username: <span style="font-weight: 100">#= Username #</span></dt>
+            <dt>Name: <span style="font-weight:100">#= Name #</span></dt>
+            <dt>Email: <span style="font-weight: 100">#= Email #</span></dt>
+            <dt>Role: <span style="font-weight:100">#= Role #</span></dt>
+            <dt>Registered On: <span style="font-weight:100">#= RegisteredOn #</span></dt>
+            <dt style="padding-bottom:10px">User Status: <span style="font-weight:100">#= UserStatus #</span></dt>
+            -------- ADDITIONAL DETAILS --------
+            <dt style="padding-top:10px">Gender: <span style="font-weight:100">#= Gender #</span></dt>
+            <dt>Intake Year: <span style="font-weight:100">#= IntakeYear #</span></dt>
+            <dt>Instructor/Student ID: <span style="font-weight:100">#= Code #</span></dt>
+            <dt>Who Approve: <span style="font-weight:100">#= ApprovedAdmin #</span></dt>
+            <dt>Who Update: <span style="font-weight:100">#= UpdateAdmin #</span></dt>
+            <dt>Update Detail: <span style="font-weight:100">#= UpdateDetail #</span></dt>
+            <dt>Updated On: <span style="font-weight:100">#= UpdatedOn #</span></dt>
+        </dl>
+    </div>
+</script>
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">#=data.Username#</p>
+    <p class="col-template-val">#=data.Name#</p>
+    <p class="col-template-val">#=data.Email#</p>
+    <p class="col-template-val">#= data.Role #</p>
+
+    #if(data.UserStatus=='New'){#
+    <p class="col-template-val"><span class='label label-info'>#=data.UserStatus#</span></p>
+    #}#
+
+    #if(data.UserStatus=='Disabled'){#
+    <p class="col-template-val"><span class='label label-danger'>#=data.UserStatus#</span></p>
+    #}#
+
+    #if(data.UserStatus=='Approved'){#
+    <p class="col-template-val"><span class='label label-success'>#=data.UserStatus#</span></p>
+    #}#
+
+</script>
+
+<script>
+    if ('@TempData["RegisterSuccess"]' != null && '@TempData["RegisterSuccess"]' != "") {
+        displaySuccess("Added Successfully! Remember to approved him/her.");
+    }
+      if ('@TempData["RegisterAdminSuccess"]' != null && '@TempData["RegisterAdminSuccess"]' != "") {
+        displaySuccess("Added Successfully!");
+    }
+     if ('@TempData["UserUpdated"]' != null && '@TempData["UserUpdated"]' != "") {
+        displaySuccess('@TempData["UserUpdated"]');
+    }
+         if ('@TempData["ResetPasswordSuccess"]' != null && '@TempData["ResetPasswordSuccess"]' != "") {
+        displaySuccess('@TempData["ResetPasswordSuccess"]');
+    }
+    $("#UserGrid").kendoTooltip({
+            filter: ".k-grid-Approve",
+            position: "auto",
+            content: "Approve Registration Request"       
+    });
+    $("#UserGrid").kendoTooltip({
+            filter: ".k-grid-Reject",
+            position: "auto",
+            content: "Reject  Registration Request"       
+    });
+    $("#UserGrid").kendoTooltip({
+            filter: ".k-grid-EditUser",
+            position: "auto",
+            content: "Edit User"       
+    });
+    $("#UserGrid").kendoTooltip({
+            filter: ".k-grid-Disabled",
+            position: "auto",
+            content: "Disable Login"       
+    });
+    $("#UserGrid").kendoTooltip({
+            filter: ".k-grid-Delete",
+            position: "auto",
+            content: "Delete User"       
+    });
+    $("#UserGrid").kendoTooltip({
+            filter: ".k-grid-ViewDetails",
+            position: "auto",
+            content: "View Details"       
+        });
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    var detailsTemplate = kendo.template($("#detailsTemplate").html());
+
+    function showDetails(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        var wnd = $("#DetailsWindow").data("kendoWindow");
+        wnd.content(detailsTemplate(dataItem));
+        adjustWindowSize(wnd);
+        wnd.center().open();
+    }
+    function EditSelectedUser(e) {
+         e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        location.href = "@Url.Action("edituser","account")/" + dataItem.Id;
+    }
+    function onFilterUserStatus(status) {
+        if (status == 'All') {
+            $("#allUserBtn").removeClass("w3-opacity-max");
+            $("#newUserBtn").addClass("w3-opacity-max");
+            $("#approvedUserBtn").addClass("w3-opacity-max");
+            $("#disabledUserBtn").addClass("w3-opacity-max");
+            $("#UserGrid").data("kendoGrid").dataSource.filter([]);
+        } else {
+            if (status == 'New') {
+                $("#newUserBtn").removeClass("w3-opacity-max");
+                $("#approvedUserBtn").addClass("w3-opacity-max");
+                $("#allUserBtn").addClass("w3-opacity-max");
+                $("#disabledUserBtn").addClass("w3-opacity-max");
+            }
+            if (status == 'Approved') {
+                $("#approvedUserBtn").removeClass("w3-opacity-max");
+                $("#newUserBtn").addClass("w3-opacity-max");
+                $("#allUserBtn").addClass("w3-opacity-max");
+                $("#disabledUserBtn").addClass("w3-opacity-max");
+            }
+            if (status == 'Disabled') {
+                $("#disabledUserBtn").removeClass("w3-opacity-max");
+                $("#newUserBtn").addClass("w3-opacity-max");
+                $("#allUserBtn").addClass("w3-opacity-max");
+                $("#approvedUserBtn").addClass("w3-opacity-max");
+            }
+            var grid = $("#UserGrid").data("kendoGrid");
+            grid.dataSource.filter({
+                logic: "or",
+                filters: [
+                    {
+                        field: "UserStatus",
+                        operator: "contains",
+                        value: status
+                    }
+                ]
+            });
+        }
+    }
+    function onDataBoundGrid(e) {
+        $('#UserGrid .k-grid-content').attr("style", "height:auto");
+        var grid = $("#UserGrid").data("kendoGrid");
+        var items = e.sender.items();
+        items.each(function (index) {
+            var dataItem = grid.dataItem(this);
+            if (dataItem.UserStatus != "New") {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#ApproveBtn").addClass("k-state-disabled");
+                $("tr[data-uid='" + dataItem.uid + "']").find("#ApproveBtn").css('opacity', '0.2');
+
+                 $("tr[data-uid='" + dataItem.uid + "']").find("#RejectBtn").addClass("k-state-disabled");
+                $("tr[data-uid='" + dataItem.uid + "']").find("#RejectBtn").css('opacity', '0.2');
+            }
+            if (dataItem.Username == '@ViewContext.HttpContext.User.Identity.Name') {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#DisabledBtn").addClass("k-state-disabled");
+                $("tr[data-uid='" + dataItem.uid + "']").find("#DisabledBtn").css('opacity', '0.2');
+
+                $("tr[data-uid='" + dataItem.uid + "']").find("#DeleteBtn").addClass("k-state-disabled");
+                $("tr[data-uid='" + dataItem.uid + "']").find("#DeleteBtn").css('opacity', '0.2');
+            }
+            if (dataItem.UserStatus != "Approved") {
+                 $("tr[data-uid='" + dataItem.uid + "']").find("#DisabledBtn").addClass("k-state-disabled");
+                $("tr[data-uid='" + dataItem.uid + "']").find("#DisabledBtn").css('opacity', '0.2');
+            }
+        });
+    }
+    function ApproveUserRegistration(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        if (confirm("Are you sure to Approve " + dataItem.Name + "?")) {
+            $("#progressSpin").fadeIn("slow");
+            $("#progressSpin").css('display', 'inline');
+            $.ajax({
+                url: '@Url.Action("ApproveUser", "Account")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (response) {
+                    //no error
+                    if (response == "") {
+                        $("#progressSpin").fadeOut();
+                        $('#UserGrid').data('kendoGrid').dataSource.read();
+                        $('#UserGrid').data('kendoGrid').refresh();
+                        displaySuccess("User is approved successfully.");
+                        $('#newuserCount').text($('#newuserCount').text() - 1);
+                        var approvedUser = parseInt($('#approveduserCount').text());
+                        var addApprovedUser = approvedUser + 1;
+                        $('#approveduserCount').text(addApprovedUser);
+                    } else {
+                        displayError(response);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function RejectUserRegistration(e) {
+        if (confirm("This user registration data will be deleted from the system. Are you sure to proceed reject this user?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+            $("#progressSpin").fadeIn("slow");
+            $("#progressSpin").css('display', 'inline');
+            $.ajax({
+                url: '@Url.Action("RejectUser", "Account")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (response) {
+                    //no error
+                    if (response == "") {
+                        $("#progressSpin").fadeOut();
+                        $('#UserGrid').data('kendoGrid').dataSource.read();
+                        $('#UserGrid').data('kendoGrid').refresh();
+                        displaySuccess("User is rejected successfully.");
+                        $('#newuserCount').text($('#newuserCount').text() - 1);
+                        $('#alluserCount').text($('#alluserCount').text() - 1);
+                    } else {
+                        displayError(response);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function DisableUserLogin(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        if (confirm("Are you sure to Disable " + dataItem.Name + " to login to the portal?")) {
+            $("#progressSpin").fadeIn("slow");
+            $("#progressSpin").css('display', 'inline');
+            $.ajax({
+                url: '@Url.Action("DisableLogin", "Account")',
+                type: "GET",
+                data: {Id: dataItem.Id},
+                success: function (response) {
+                   //no error
+                    if (response == "") {
+                        $("#progressSpin").fadeOut();
+                        $('#UserGrid').data('kendoGrid').dataSource.read();
+                        $('#UserGrid').data('kendoGrid').refresh();
+                        displaySuccess("User has been successfully disabled to login to the portal.");
+                        $('#approveduserCount').text($('#approveduserCount').text() - 1);
+                        var disabledUser = parseInt($('#disableduserCount').text());
+                        var addDisabledUser = disabledUser + 1;
+                        $('#disableduserCount').text(addDisabledUser);
+                    } else {
+                         displayError(response);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function DeleteSelectedUser(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        if (confirm("All the related data will be deleted. Are you sure to Delete all " + dataItem.Name + "'s data?")) {
+            $("#progressSpin").fadeIn("slow");
+            $("#progressSpin").css('display', 'inline');
+            $.ajax({
+                url: '@Url.Action("DeleteUser", "Account")',
+                type: "GET",
+                data: {Id: dataItem.Id},
+                success: function (response) {
+                   //no error
+                    if (response == "") {
+                        $("#progressSpin").fadeOut();
+                        $('#UserGrid').data('kendoGrid').dataSource.read();
+                        $('#UserGrid').data('kendoGrid').refresh();
+                        displaySuccess("User is deleted successfully.");
+                         setTimeout(function () {
+                           location.reload();
+                        }, 2000);
+                    } else {
+                         displayError(response);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+</script>

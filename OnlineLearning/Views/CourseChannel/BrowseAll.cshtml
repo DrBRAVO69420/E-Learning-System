@@ -1,0 +1,228 @@
+﻿@model OnlineLearning.Models.CourseChannelViewModel
+
+@{
+    ViewBag.Title = "Browse All Course Channels";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+    <div style="padding-left:17px;padding-right:17px">
+        <div class="row">
+            <div class="w3-panel sectionHeading w3-padding-16">
+                <h3 class="text-indigo bolder" style="display:inline">
+                    <i class="glyphicon glyphicon-briefcase"></i> All Available Course Channels
+                </h3>
+                <span class="smallPaddingLeftRight">
+                    <i class="glyphicon glyphicon-th link w3-xlarge smallPaddingLeftRight pointer-cursor" onclick="gridView()"></i>
+                    <i class="glyphicon glyphicon-th-list link w3-xlarge smallPaddingLeftRight pointer-cursor" onclick="listView()"></i>
+                </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-9 padding-0">
+                <input id="search" type="text" class="k-textbox" value="@Context.Request.QueryString["search"]" placeholder="Search Course Channel" />
+            </div>
+            <div class="col-md-3">
+                <button class="button-indigo" type="button" onclick="searchCourse()"><i class="glyphicon glyphicon-search"></i> Search</button>
+                <button class="button-indigo" onclick="clearSearch()">Clear</button>
+            </div>
+        </div>
+        <div class="row">
+            <div onclick="onFilterEnrollment(false)" type="button" class="col-md-6 padding-0 w3-hover-opacity-off pointer-cursor " data-toggle="tooltip" data-placement="top" title="All available course channels">
+                <div id="allFilterBtn" class="w3-container small-card smallPaddingTopBottom w3-hover-opacity-off" style="background-color:#c7a4ca;color:#0a1210;" >
+                    <h4 class="w3-left" style="padding:0;">All Course Channels</h4>
+                    <div class="w3-right" style="padding-right:20px">
+                        <h3 id="alluserCount" @*style="margin: 3px 0px 3px 0px"*@>@Model.TotalCount</h3>
+                    </div>
+                </div>
+            </div>
+            <div  onclick="onFilterEnrollment(true)" type="button" class=" col-md-6 padding-0 w3-hover-opacity-off pointer-cursor " data-toggle="tooltip" data-placement="top" title="Your enrolled course channels">
+                <div id="enrollFilterBtn" class="w3-container small-card smallPaddingTopBottom w3-hover-opacity-off" style="background-color: #f0f0df;color:#0a1210;">
+                    <h4 class="w3-left" style="padding:0">My Enrollment</h4>
+                    <div class="w3-right" style="padding-right:20px">
+                        <h3 id="alluserCount">@Model.MyEnrollCount</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row text-center padding-0">
+        @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+    </div>
+
+<!--By default, grid view-->
+<div id="grid" class="w3-padding-16">
+    @Html.Partial("~/Views/Shared/_CourseChannelGrid.cshtml")
+</div>
+<div id="list" class="w3-padding-16" style="display:none">
+    @Html.Partial("~/Views/Shared/_CourseChannelList.cshtml")
+</div>
+<!-- ------------------------------ Modal ------------------------------ -->
+<div class="modal fade" id="sureEnrollModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content background-indigo-black">
+            <div class="row">
+                <button type="button" class="close w3-text-white" data-dismiss="modal" style="padding:15px;color:lightgray">&times;</button>
+            </div>
+            <div class="row">
+                <div class="modal-body text-center">
+                    <!--icon-->
+                    <div class="row">
+                        <i class="fa fa-mortar-board" style="font-size:50px;color:greenyellow"></i>
+                    </div>
+                    <!--header-->
+                    <div class="row paddingTopBottom" style="color:greenyellow">
+                        <b id="courseName" style="font-size:20px"></b>
+                    </div>
+                    <!--body-->
+                    <div class="row" style="color:white">
+                        <p class="w3-large">
+                            Are you sure to enroll in this course?
+                        </p>
+                    </div>
+                    <!--close button-->
+                    <div class="row" style="padding:10px 2px 25px 2px">
+                        <button type="button" class="button-white w3-round-medium" data-dismiss="modal">No</button>
+                        <button type="button" class="button-indigo" onclick="enrollCourse()">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var enroll;
+
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        var enroll = getUrlVars()["myenroll"];
+        console.log(enroll);
+        if (enroll == 'true') {
+            $("#enrollFilterBtn").removeClass("w3-opacity-max");
+            $("#enrollFilterBtn").addClass("w3-opacity-off");
+            $("#allFilterBtn").addClass("w3-opacity-max");
+        }
+        if (enroll == 'false') {
+            $("#allFilterBtn").removeClass("w3-opacity-max");
+            $("#allFilterBtn").addClass("w3-opacity-off");
+            $("#enrollFilterBtn").addClass("w3-opacity-max");
+
+        } if(enroll == null) {
+             $("#allFilterBtn").removeClass("w3-opacity-max");
+            $("#allFilterBtn").addClass("w3-opacity-off");
+            $("#enrollFilterBtn").addClass("w3-opacity-max");
+        }
+    });
+    function listView() {
+        $("#grid").hide();
+        $("#list").show();
+    }
+    function gridView() {
+        $("#grid").show();
+        $("#list").hide();
+
+    }
+    if ('@ViewBag.Grid' == "True") {
+        showGrid();
+    }
+    if ('@ViewBag.List' == "True") {
+        showList();
+    }
+    function showList() {
+        $("#grid").hide();
+        $("#list").show();
+    }
+      function showGrid() {
+        $("#grid").show();
+        $("#list").hide();
+    }
+    function listView() {
+        var query = $("#search").val();
+        if (query != "" && query != null) {
+            //location.href = "/coursechannel/browseall?search=" + query + "&view=list";
+            location.href = "@Url.Action("browseall","coursechannel")?search=" + query + "&view=list";
+        } else {
+            location.href = "@Url.Action("browseall","coursechannel")?view=list";
+        }
+    }
+    function gridView() {
+         var query = $("#search").val();
+        if (query != "" && query != null) {
+            location.href = "@Url.Action("browseall","coursechannel")?search=" + query + "&view=grid";
+        } else {
+            location.href = "@Url.Action("browseall","coursechannel")?view=grid";
+        }
+    }
+    function onFilterEnrollment(filterEnroll) {
+        enroll = filterEnroll;
+        var query = $("#search").val();
+        if ('@ViewBag.Grid' == "True") {
+             location.href = "@Url.Action("browseall","coursechannel")?search=" + query + "&view=grid&myenroll="+filterEnroll;
+        }
+        if ('@ViewBag.List' == "True") {
+            location.href = "@Url.Action("browseall","coursechannel")?search=" + query + "&view=list&myenroll="+filterEnroll;
+        }
+    }
+    $('#search').keypress(function (e) {
+         var key = e.which;
+         if(key == 13)  // the enter key code
+         {
+             searchCourse();
+          }
+        });   
+    function searchCourse() {
+        var query = $("#search").val();
+         if ('@ViewBag.Grid' == "True") {
+             location.href = "@Url.Action("browseall","coursechannel")?search=" + query + "&view=grid";
+        }
+        if ('@ViewBag.List' == "True") {
+            location.href = "@Url.Action("browseall","coursechannel")?search=" + query + "&view=list";
+        }
+    }
+        
+    function clearSearch() {
+        if ('@ViewBag.Grid' == "True") {
+            location.href = "@Url.Action("browseall","coursechannel")?view=grid";
+        }
+        if ('@ViewBag.List' == "True") {
+            location.href = "@Url.Action("browseall","coursechannel")?view=list";
+        } else {
+            location.href = "@Url.Action("browseall","coursechannel")?view=grid";
+        }
+    }
+    function sureEnroll(courseId, courseName) {
+        if (confirm("Are you sure to enroll in " + courseName)) {
+            $.ajax({
+                url: '@Url.Action("EnrollInCourse", "CourseChannel")',
+                type: "GET",
+                data: { Id: courseId },
+                success: function (result) {
+                    if (result == "") {
+                       
+                        displaySuccess("Enrolled Successfully! Redirecting ......");
+                        location.href = "@Url.Action("manage","coursechannel")/" + courseId;
+                        //go to the course page
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+   // Read a page's GET URL variables and return them as an associative array.
+    function getUrlVars()
+    {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
+</script>
+

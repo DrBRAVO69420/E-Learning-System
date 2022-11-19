@@ -1,0 +1,104 @@
+﻿<!-- --------- Navbar (sit on top) --------- -->
+<div id="topNavBar" class="w3-top">
+    <div class="w3-bar w3-text-white w3-padding small-card background-indigo" style="letter-spacing:4px;">
+        <span><img src="~/Assest/logo.png" class="w3-bar-item img-responsive padding-0" style="width:58px;padding:0px" /></span>
+        <span class="w3-bar-item" id="portalName" style="padding:8px 16px"></span>
+        <!-- Hide right-floated links on small screens and replace them with a menu icon -->
+        <a href="javascript:void(0)" class="w3-bar-item button-light w3-right w3-hide-large" onclick="w3_open()">
+            <i class="fa fa-bars"></i>
+        </a>
+        <!-- Right-sided navbar links. Hide them on small screens -->
+        <div class="w3-right w3-hide-small w3-hide-medium">
+            @if (Request.IsAuthenticated)
+            {
+                if (ViewContext.HttpContext.User.IsInRole("Admin"))
+                {
+                    <a href="@Url.Action("manageuser","account")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "manageuser" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-user"></i> Users</a>
+                    <a href="@Url.Action("general","announcement")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "announcement" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-bullhorn"></i> Announcement</a>
+                }
+                if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+                {
+        <a href="@Url.Action("teacher","home")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "home" && ViewContext.RouteData.Values["Action"].ToString() == "teacher" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-home"></i> Home</a>
+        <a href="@Url.Action("list","coursechannel")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "list" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-briefcase"></i> Course Channel</a>
+                }
+                if (ViewContext.HttpContext.User.IsInRole("Student"))
+                {
+        <a href="@Url.Action("student","home")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "home" && ViewContext.RouteData.Values["Action"].ToString() == "student" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-home"></i> Home</a>
+        <a href="@Url.Action("browseall","coursechannel")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "browseall" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-briefcase"></i> All Course Channel</a>
+                }
+            <a href="@Url.Action("message","chat")" style="position:relative;" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "chat" && ViewContext.RouteData.Values["Action"].ToString() == "message" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-comment"></i> Chat </a>
+        <a href="@Url.Action("index","setting")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "setting" && ViewContext.RouteData.Values["Action"].ToString() == "index" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-cog"></i> Setting</a>
+                
+        @Html.Partial("~/Views/Shared/_LoginPartial.cshtml")
+            }
+            else
+            {
+        <a href="@Url.Action("index","home")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "home" && ViewContext.RouteData.Values["Action"].ToString() == "index" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-home"></i> Home</a>
+        <a href="@Url.Action("login","account")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "login" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-log-in"></i> Log In</a>
+        <a href="@Url.Action("register","account")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "register" ? "activeNavButton" : "")"><i class="glyphicon glyphicon-plus"></i> Register</a>
+            }
+        </div>
+    </div>
+</div>
+<!-- Sidebar on small screens when clicking the menu icon -->
+<nav class="w3-sidebar w3-bar-block small-card w3-animate-left w3-hide-large background-indigo" style="display:none;z-index:3;width:200px;top:58px" id="mySidebar">
+    @if (Request.IsAuthenticated)
+    {
+        if (ViewContext.HttpContext.User.IsInRole("Admin"))
+        {
+            <a href="@Url.Action("manageuser","account")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "manageuser" ? "activeNavButton" : "")">Users</a>
+            <a href="@Url.Action("general","announcement")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "announcement" ? "activeNavButton" : "")">Announcement</a>
+        }
+        if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+        {
+            <a href="@Url.Action("teacher","home")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "home" && ViewContext.RouteData.Values["Action"].ToString() == "teacher" ? "activeNavButton" : "")">Home</a>
+            <a href="@Url.Action("list","coursechannel")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "list" ? "activeNavButton" : "")">Course Channel</a>
+        }
+        if (ViewContext.HttpContext.User.IsInRole("Student"))
+        {
+            <a href="@Url.Action("student","home")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "home" && ViewContext.RouteData.Values["Action"].ToString() == "student" ? "activeNavButton" : "")">Home</a>
+            <a href="@Url.Action("browseall","coursechannel")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "browseall" ? "activeNavButton" : "")">All Course Channel</a>
+        }
+        <a href="@Url.Action("message","chat")"  onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "chat" && ViewContext.RouteData.Values["Action"].ToString() == "message" ? "activeNavButton" : "")">Chat </a>
+        <a href="@Url.Action("index","setting")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "setting" && ViewContext.RouteData.Values["Action"].ToString() == "index" ? "activeNavButton" : "")">Setting</a>
+        @Html.Partial("~/Views/Shared/_LoginPartialLeftnav.cshtml")
+    }
+    else
+    {
+        <a href="@Url.Action("index","home")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "home" && ViewContext.RouteData.Values["Action"].ToString() == "index" ? "activeNavButton" : "")">Home</a>
+        <a href="@Url.Action("login","account")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "login" ? "activeNavButton" : "")">Log In</a>
+        <a href="@Url.Action("register","account")" onclick="w3_close()" class="w3-bar-item w3-border-bottom button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "register" ? "activeNavButton" : "")">Register</a>
+    }
+</nav>
+
+<!-- ------------------ Side Menu shown in small screen ------------------ -->
+@*<nav id="mySidebar" class="w3-sidebar w3-collapse background-indigo-black w3-animate-left" style="z-index:3;width:280px;top:56.4px">
+        <div class="w3-bar-block">
+            @if (Request.IsAuthenticated)
+            {
+                if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+                {
+                    <a href="/coursechannel/list" class="w3-bar-item leftNavBtn w3-padding @(ViewContext.RouteData.Values["Controller"].ToString() == "coursechannel" && ViewContext.RouteData.Values["Action"].ToString() == "list" ? "activeLeftNavBtn" : "")">Course Channel</a>
+                }
+                if (ViewContext.HttpContext.User.IsInRole("Admin"))
+                {
+                    <a href="/account/manageuser" class="w3-bar-item leftNavBtn w3-padding @(ViewContext.RouteData.Values["Controller"].ToString() == "account" ? "activeLeftNavBtn" : "")"><i class="fa fa-user"></i><span style="padding-left:10px;">Users</span></a>
+                    <a href="/announcement/general" class="w3-bar-item leftNavBtn w3-padding @(ViewContext.RouteData.Values["Controller"].ToString() == "announcement" ? "activeLeftNavBtn" : "")"><i class="fa fa-bullhorn"></i><span style="padding-left:10px;">Announcement</span></a>
+                }
+                <a href="/setting/index" class="w3-bar-item leftNavBtn w3-padding @(ViewContext.RouteData.Values["Controller"].ToString() == "setting" && ViewContext.RouteData.Values["Action"].ToString() == "index" ? "activeLeftNavBtn" : "")">Setting</a>
+                <div class="w3-hide-medium w3-hide-large">
+                    @Html.Partial("_LoginPartialLeftNav")
+                </div>
+            }
+            else
+            {
+                <a href="/home/index" class="w3-bar-item leftNavBtn w3-padding @(ViewContext.RouteData.Values["Controller"].ToString() == "home" && ViewContext.RouteData.Values["Action"].ToString() == "index" ? "activeNavButton" : "")">Home</a>
+                <a href="/account/login" class="w3-bar-item leftNavBtn w3-padding @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "login" ? "activeNavButton" : "")">Log In</a>
+                <a href="/account/register" class="w3-bar-item leftNavBtn w3-padding @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "register" ? "activeNavButton" : "")">Register</a>
+            }
+        </div>
+    </nav>*@
+
+<!-- ------------------ Overlay effect when opening sidebar on small screens ------------------ -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+

@@ -1,0 +1,33 @@
+﻿@model OnlineLearning.Models.QuizViewModels
+@{
+    ViewBag.Title = "Quiz Result";
+    Layout = "~/Views/Shared/_QuizGameLayout.cshtml";
+}
+    <div class="w3-padding-24">
+        <div class="row">
+            <h1 class="text-center text-indigo bolder">Quiz End !</h1>
+        </div>
+        <div class="row w3-padding-16">
+            <div class="w3-padding w3-xxlarge w3-white w3-card bolder text-center">
+                You answered <b class="w3-text-green w3-xxxlarge">@Model.CorrectCount</b> Questions Correctly,
+                <b class="w3-text-red w3-xxxlarge">@Model.WrongCount</b> Questions Wrongly
+            </div>
+        </div>
+        <div class="row text-center w3-padding-16">
+            <a class="button-indigo btn btn-lg" href="@Url.Action("list","quiz",new { Id = Model.CourseChannelId})">Return to <span id="portalName"></span> & Review Quiz Results</a>
+        </div>
+    </div>
+<script>
+    //load portal name
+        $(document).ready(function () {
+            $.ajax({
+                url: '@Url.Action("GetAppSettingsValue", "GeneralFunction")',
+                type: "GET",
+                data: {key: "portalName"},
+                success: function (response) {
+                    $("#portalName").text(response);
+                }
+            });
+        });
+</script>
+

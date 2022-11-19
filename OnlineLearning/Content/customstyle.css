@@ -1,0 +1,889 @@
+﻿/* ----------------------------- [Body] ----------------------------- */
+html {
+    scroll-behavior: smooth;
+}
+html, body {
+    font-family: "Raleway", sans-serif, 'Times New Roman', Times, serif;
+    font-size:16px;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Poppins", sans-serif, 'Times New Roman', Times, serif;
+    word-wrap:break-word;
+    line-height:1.3;
+}
+body {
+    background-color: white;
+    /*padding-top: 45px;*/
+    margin: 0;
+}
+p{
+    margin:0 0 5px;
+}
+/*Default width for pop up editor window: 400px, below is for handling pop up editor in smaller screen*/
+
+/*Phone width 360px*/
+@media (max-width:360px) {
+    .k-edit-form-container {
+        width: 360px;
+    }
+}
+/* iPhone4, iPhone5 width 320px*/
+@media (max-width:320px) {
+    .k-edit-form-container {
+        width: 320px;
+    }
+}
+/* iPhone6/7/8 width 375px*/
+@media (max-width:375px) {
+    .k-edit-form-container {
+        width: 375px;
+    }
+}
+
+.k-edit-form-container {
+    width: 100%;
+}
+
+/* ----------------------------- [Font]* ----------------------------- */
+@font-face {
+    font-family: 'Raleway';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Raleway'), local('Raleway-Regular'), url(https://fonts.gstatic.com/s/raleway/v14/1Ptug8zYS_SKggPNyCMIT5lu.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Raleway';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Raleway'), local('Raleway-Regular'), url(https://fonts.gstatic.com/s/raleway/v14/1Ptug8zYS_SKggPNyC0ITw.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Poppins Regular'), local('Poppins-Regular'), url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJbecmNE.woff2) format('woff2');
+    unicode-range: U+0900-097F, U+1CD0-1CF6, U+1CF8-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FB;
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Poppins Regular'), local('Poppins-Regular'), url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJnecmNE.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Poppins Regular'), local('Poppins-Regular'), url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecg.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/oswald/v31/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUtiZTaR.woff2) format('woff2');
+    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/oswald/v31/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUJiZTaR.woff2) format('woff2');
+    unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/oswald/v31/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUliZTaR.woff2) format('woff2');
+    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/oswald/v31/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUhiZTaR.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Oswald';
+    font-style: normal;
+    font-weight: 400;
+    src: url(https://fonts.gstatic.com/s/oswald/v31/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUZiZQ.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Montserrat Regular'), local('Montserrat-Regular'), url(https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459WRhyzbi.woff2) format('woff2');
+    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Montserrat Regular'), local('Montserrat-Regular'), url(https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459W1hyzbi.woff2) format('woff2');
+    unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Montserrat Regular'), local('Montserrat-Regular'), url(https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459WZhyzbi.woff2) format('woff2');
+    unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Montserrat Regular'), local('Montserrat-Regular'), url(https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wdhyzbi.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Montserrat Regular'), local('Montserrat-Regular'), url(https://fonts.gstatic.com/s/montserrat/v14/JTUSjIg1_i6t8kCHKm459Wlhyw.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* ----------------------------- [General]* ----------------------------- */
+.width100 {
+    width: 100%;
+}
+.pointer-cursor{
+    cursor: pointer;
+}
+input[readonly], input[disabled] {
+    cursor: not-allowed;
+    background-color: #eee;
+}
+.small-card {
+    box-shadow: 0 2px 5px 0 rgba(38, 35, 51,0.15),0 2px 10px 0 rgba(38, 35, 51,0.12);
+}
+/* ----------------------------- [Border]* ----------------------------- */
+.gold-border {
+    border: 1px solid #dbcb90;
+    /*#f0ead3*/
+}
+/* ----------------------------- [Text] ----------------------------- */
+.light{
+    font-weight:lighter;
+}
+.bolder{
+    font-weight:bolder;
+}
+.bold{
+    font-weight:bold;
+}
+.course-channel-name {
+    font-size: 18px;
+    font-family: "Poppins";
+    padding-top:5px;
+    padding-bottom:2px;
+}
+.text-medium {
+    font-size: 25px;
+}
+.text-large {
+    font-size: 55px;
+}
+.text-xlarge{
+    font-size:70px;
+}
+.one-line-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.sectionHeading {
+    background-image: linear-gradient(to bottom right, #dcdae3, #eeeeee);
+    border-left: 10px solid #593fc8;
+}
+/* ----------------------------- [Alert] ----------------------------- */
+.alert-success {
+    background-color: GreenYellow;
+    margin-bottom: 0px;
+    padding: 8px;
+    font-weight:900;
+    color:darkgreen;
+}
+
+.alert-info {
+    background-color: DodgerBlue;
+    margin-bottom: 0px;
+    color: white;
+    padding: 8px;
+    font-weight: 900;
+}
+
+.alert-danger {
+    background-color: Crimson;
+    margin-bottom: 0px;
+    color: white;
+    padding: 8px;
+    font-weight: 900;
+}
+.alert-dismissable .close, .alert-dismissible .close {
+    right: 0px;
+}
+/* ----------------------------- [Link] ----------------------------- */
+
+a {
+    color: #50bba1;
+    text-decoration:none;
+    font-weight:bolder;
+
+}
+    a:hover {
+        color: #2f2266;
+        text-decoration: none;
+    }
+.link {
+    color: #50bba1; /*dark-cyan*/
+}
+
+    .link:hover {
+        color: #2f2266; /*dark-indigo*/
+    }
+
+/* ----------------------------- [Logo] ----------------------------- */
+.logoNav {
+    width: 100px;
+    height: 60px;
+}
+
+/* ----------------------------- [Color] ----------------------------- */
+.text-indigo {
+    color: #593fc8
+}
+.text-darkindigo {
+    color: #2f2266;
+}
+.text-gold {
+    color: #b3a678;
+}
+.text-cyan {
+    color: #a3f6e2;
+}
+.text-darkcyan {
+    color: #50bba1;
+}
+.background-light {
+    background-color: gray;
+}
+.background-gold {
+    background-color: #b3a678;
+}
+.background-cyan {
+    background-color: #a3f6e2;
+}
+.background-indigo {
+    background-color: #593fc8;
+}
+.background-light-indigo {
+    background-color: #bc62fd;
+    color: #fffcfa;
+}
+.background-indigo-black {
+    background-color: #080320;
+}
+/* ----------------------------- [Button] ----------------------------- */
+.button-indigo {
+    background-color: #593fc8;
+    color: white;   
+    border: 1px solid #593fc8;
+    display: inline-block;
+    padding: 8px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius:7px;
+}
+    .button-indigo:hover {
+        background-color: transparent;
+        color: #593fc8;
+        
+    }
+.button-white {
+    background-color: white;
+    color: #593fc8;
+    border: 1px solid #593fc8;
+    display: inline-block;
+    padding: 8px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+}
+    .button-white:hover {
+        background-color: transparent;
+        color: white;
+    }
+.button-light {
+    background-color: transparent;
+    color: white;
+    border-bottom: 2px solid transparent;
+    display: inline-block;
+    padding: 8px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing:1px;
+}
+    .button-light:hover {
+        border-bottom: 2px solid #50bba1;
+        color: PaleGreen;
+    }
+.button-border-line {
+    background-color: transparent;
+    color: #593fc8;
+    border: 2px solid #593fc8;
+    display: inline-block;
+    padding: 8px 16px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+    .button-border-line:hover {
+        background-color: #593fc8;
+        color:white;
+    }
+
+.activeNavButton {
+    color: #a3f6e2;
+    font-weight: 900;
+    border-bottom: 2px solid #50bba1;
+}
+    .w3-bar .w3-bar-item {
+        border-bottom: 2px solid transparent;
+    }
+        .w3-bar .w3-bar-item:hover {
+            border-bottom: 2px solid #50bba1;
+        }
+.w3-radio:hover{
+    cursor:pointer;
+}
+.text-button {
+    background-color: transparent;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    color: #593fc8;
+    border-bottom: 2px solid #593fc8;
+}
+    .text-button:hover {
+        color:  #50bba1;
+        border-bottom: 2px solid #50bba1;
+    }
+    .radio-btn{
+        width:16px;
+        height:16px;
+        top:0px;
+        position:relative;
+    }
+/* Tab Like Navigation */
+.activeNav {
+    color: #593fc8;
+    font-weight: 900;
+    border-bottom: 6px solid #50bba1;
+    font-family: "Poppins";
+    background-color: #fafafa;
+}
+.nav-item {
+    font-size: 17px;
+}
+
+    .nav-item:hover {
+        color: #50bba1;
+        font-weight: 900;
+    }
+
+@media (max-width:420px) {
+    #coverImg {
+        height: 70px;
+    }
+
+    .nav-item {
+        font-size: 15px;
+    }
+}
+/*Responsive for breadcrumb and course channel top nav bar*/
+
+
+body {
+    position: relative;
+}
+
+.affix {
+    top: 56px;
+    width: 100%;
+    z-index: 9999 !important;
+    padding: 0px;
+}
+
+.navbar {
+    margin-bottom: 0px;
+    border: none;
+    min-height: 20px;
+}
+
+.container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.affix ~ .container-fluid {
+    position: relative;
+    top: 56px;
+}
+.breadcrumb-affix {
+    top: 101px;
+    width: 100%;
+    z-index: 9999 !important;
+    padding: 0px;
+    background-color: white;
+}
+
+    /* ----------------------------- [Override Boostrap] ----------------------------- */
+    .row {
+        margin-left: 0px;
+        margin-right: 0px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+.form-group {
+    margin-bottom: 5px;
+}
+.leftNavBtn:hover {
+    background-color: #593fc8;
+    color:white;
+}
+.activeLeftNavBtn {
+    /*background-color: #323136;*/
+    background-color: gray;
+    color: white;
+    font-weight: bolder;
+}
+    .activeLeftNavBtn:hover {
+        background-color: gray;
+        color: white;
+        font-weight: bolder;
+    }
+    /* ----------------------------- [Container or Alert] ----------------------------- */
+    .alert-fixed {
+        position: fixed;
+        top: 13px;
+        margin-left: 75px;
+        width: 50%;
+        z-index: 9999;
+        border-radius: 0px;
+        float: none;
+    }
+.smallRoundedBorder {
+    border: 1px solid white;
+    border-radius: 10px;
+}
+.roundedBorder {
+    border: 1px solid white;
+    border-radius: 30px;
+}
+.centerBlock {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    float: none;
+}
+        
+
+/* ----------------------------- [Overide Kendo CSS] ----------------------------- */
+.editor-label {
+    color: black;
+}
+.k-grid tbody .k-button {
+    min-width: 0px;
+}
+.k-textbox {
+    width: 100%;
+    border-color: #ccc;
+}
+input.k-textbox {
+    padding: 8px;
+}
+/*.k-dropdown-wrap .k-input {
+    padding: 8px;
+}*/
+.k-dropdown-wrap .k-input {
+    padding: 0px;
+}
+
+.k-pager-sizes .k-dropdown-wrap .k-input {
+    height: 1.8em;
+}
+
+.k-pager-wrap > .k-link {
+    height: 1.5em;
+}
+
+.k-pager-numbers .k-link, .k-pager-numbers .k-state-selected {
+    height: 1.5em;
+}
+.k-filter-help-text{
+    color:white;
+}
+.k-grid td.k-state-selected:hover, .k-grid tr:hover{
+    background-color:lightgray;
+    color:black;
+}
+.k-grid-norecords-template{
+    width:99.8%;
+}
+.k-grid-toolbar .k-button {
+    padding: 5px 8px;
+}
+/*Image inside kendo grid*/
+.imageInGrid {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    transition: transform .2s;
+    background-size: 50px 45px;
+    background-position: center center;
+    vertical-align: middle;
+    line-height: 50px;
+    box-shadow: inset 0 0 1px #999, inset 0 0 10px rgba(0,0,0,.2);
+}
+.k-filter-help-text{
+    color:black;
+}
+.k-pager-wrap .k-link, .k-pager-wrap .k-state-selected{
+    z-index:0;
+}
+.k-pager-wrap.k-pager-lg .k-pager-numbers, .k-pager-wrap.k-pager-md .k-pager-numbers, .k-pager-wrap.k-pager-sm .k-pager-numbers {
+    z-index: 0;
+}
+/* ----------------------------- [Breadcrumb] ----------------------------- */
+.affix .breadcrumb {
+    background-color: #ecebf2;
+    margin-bottom: 0px;
+    font-weight: bolder;
+}
+.breadcrumb-affix .breadcrumb {
+    background-color: white;
+    /*background-color: #ecebf2;*/
+    margin-bottom: 0px;
+    font-weight: bolder;
+}
+/*.breadcrumb {
+    background-color: white;
+    margin-bottom: 0px;
+    font-weight: bolder;
+}*/
+
+    .breadcrumb > li + li:before {
+        content: ">";
+        font-size: 18px;
+        color:darkgray;
+        font-weight: bolder;
+    }
+
+.breadcrumb-item {
+    color: #50bba1;
+    font-size: 15px;
+}
+
+    .breadcrumb-item:hover {
+        color: #2f2266; /*dark indigo, same as .link class hover*/
+    }
+
+.active-breadcrumb-item {
+    color: gray;
+}
+
+    .active-breadcrumb-item:hover {
+        color: gray;
+        cursor: default;
+    }
+/* ----------------------------- [Margin] ----------------------------- */
+.small-margin-top{
+    margin-top:8px;
+}
+.small-margin-bottom {
+    margin-bottom: 8px;
+}
+
+/* ----------------------------- [Padding] ----------------------------- */
+/*used when want to add small/medium/large padding around a contaniner*/
+.padding-0{
+    padding:0px;
+}
+.padding-5 {
+    padding: 5px;
+}
+.padding-10 {
+    padding: 10px;
+}
+.padding-32 {
+    padding:32px;
+}
+.padding-100 {
+    padding: 100px;
+}
+.smallPaddingLeftRight {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.smallPaddingTopBottom {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.mediumPaddingLeftRight {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.mediumPaddingTopBottom {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.largePaddingTopBottom {
+    padding-top: 120px;
+    padding-bottom: 120px;
+}
+.largePaddingLeftRight {
+    padding-left: 50px;
+    padding-right: 50px;
+}
+.smallerContainerPadding {
+    padding: 50px 20px 50px 20px;
+}
+.containerPadding {
+    padding: 130px 100px 130px 100px;
+}
+.bodyContainerPadding {
+    padding: 20px 50px 20px 50px;
+}
+
+/* ----------------------------- [Form] ----------------------------- */
+.required:after {
+    content: ' *';
+    display: inline;
+    color: red;
+    font-size: large;
+}
+.searchBar {
+    padding: 10px;
+}
+.input-width50 {
+    width: 50%;
+}
+
+/* ----------------------------- [Button inside Grid] ----------------------------- */
+.approve-btn{
+    color:forestgreen;
+}
+.reject-btn {
+    color: DeepPink;
+}
+.password-btn {
+    color: blue;
+}
+.disable-btn {
+    color: firebrick;
+}
+.delete-btn {
+    color: red;
+}
+.detail-btn {
+    color: purple;
+}
+.edit-btn {
+    color: indigo;
+}
+
+/* ----------------------------- [Export to Pdf or Excel] ----------------------------- */
+.page-template {
+    font-family: "DejaVu Sans", "Arial", sans-serif;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+    .page-template .header {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        right: 30px;
+        border-bottom: 1px solid #888;
+        color: #888;
+    }
+
+    .page-template .footer {
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        right: 30px;
+        border-top: 1px solid #888;
+        text-align: center;
+        color: #888;
+    }
+
+.k-group-footer {
+    display: none;
+}
+
+.k-pdf-export .k-grid-toolbar,
+.k-pdf-export .k-pager-wrap,
+.k-pdf-export .k-command-cell,
+.k-pdf-export .k-grid-filter, .k-pdf-export .actionColumn {
+    display: none;
+}
+
+
+/* ----------------------------- [Responsive] ----------------------------- */
+@media (max-width:780px){
+    .largePaddingLeftRight {
+        padding: 10px 5px 10px 5px;
+    }
+}
+
+/*phone css*/
+@media (max-width:420px) {
+    .actionColumn {
+        width: 80px;
+        padding-right: 0px;
+        text-align: center;
+        padding-left: 0px;
+    }
+    .k-grid-header th.k-header{
+        font-weight:bolder;
+        padding-right: 0px;
+        padding-left: 0px;
+        text-align: center;
+    }
+
+    .searchBar {
+        padding: 0px;
+        padding-top: 5px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .col-md-2, .col-md-3, .col-md-4, col-md-6, .col-md-8, .col-md-9, .col-md-10 {
+        padding: 0px;
+    }
+
+    /*.w3-modal {
+        margin-top: 90px;
+    }*/
+
+    #modelContent {
+        max-height: 380px;
+        overflow-y: scroll;
+    }
+    .containerPadding{
+        padding:60px 10px 30px 10px;
+    }
+    .text-medium {
+        font-size: 20px;
+    }
+    .text-large{
+        font-size:30px;
+    }
+    .text-xlarge {
+        font-size: 45px;
+    }
+    .bodyContainerPadding {
+        padding: 10px 0px 10px 0px;
+    }
+    .smallerContainerPadding {
+        padding: 10px 5px 10px 5px;
+    }
+    .channelName{
+        font-size:20px;
+    }
+    .largePaddingLeftRight {
+        padding: 15px 5px 15px 5px;
+    }
+    h3{
+        font-size:23px;
+    }
+    h4{
+        font-size:20px;
+    }
+    .input-width50{
+        width:100%;
+    }
+  
+}
+/*iphone 6/7/8 plus */
+@media (max-width:414px) {
+    /*.w3-modal {
+        margin-top: 10px;
+    }*/
+    #modelContent {
+        max-height: 430px;
+        overflow-y: scroll;
+    }
+
+}
+@media (max-width:375px) {
+    /*.w3-modal {
+        margin-top: 20px;
+    }*/
+ 
+    #modelContent {
+        max-height: 430px;
+        overflow-y: scroll;
+    }
+
+}
+@media (max-width:360px) {
+    /*.w3-modal {
+        margin-top: 90px;
+    }*/
+    #modelContent {
+        max-height: 380px;
+        overflow-y: scroll;
+    }
+   
+}
+
+/*e.g. iphone 4 (small size phone)*/
+@media (max-width:320px){
+    /*.w3-modal {
+        margin-top: 100px;
+    }*/
+    #modalHeading{
+        font-size:18px;
+    }
+    #modalClose {
+        font-size: 18px;
+        padding:2px 8px;
+    }
+    #modelContent {
+        max-height: 290px;
+        overflow-y: scroll;
+    }
+   
+}
+

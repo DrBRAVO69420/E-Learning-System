@@ -1,0 +1,70 @@
+﻿@model OnlineLearning.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Register";
+}
+<style>
+    /*override kendo command bootstrap*/
+    .k-checkbox-label, .k-radio-label {
+        vertical-align: bottom;
+    }
+    label{
+        margin-bottom:0px;
+        padding-left:0px
+    }
+    .form-horizontal .control-label {
+        padding-top: 0px;
+    }
+    body {
+        background-color: #080320;
+    }
+    input[type="radio"], input[type="checkbox"]{
+        margin:0px;
+    }
+</style>
+<div class="background-indigo-black largePaddingLeftRight w3-padding-48">
+    <div class="row">
+        @if (TempData["RegisterSuccess"] != null)
+        {
+            @Html.Partial("~/Views/Account/_RegisterSuccessDarkModal.cshtml") <!--displayed when registration success-->
+        }
+        <div class="col-md-12 centerBlock">
+            <div class="col-md-12 w3-white padding-32" style="border-radius:10px">
+                <div class="col-md-4" style="padding-right:0px;margin-right:0px">
+                    <p class="text-indigo text-center bold" style="margin-bottom:0px">
+                        <i class="glyphicon glyphicon-info-sign"></i> Note:
+                        After submitting your registration request, please wait for the admin to approve it.
+                        You will receive an email when your registration is approved and then only can log in to the portal.
+                    </p>
+                    <img src="~/Assest/welcome.png" class="img-responsive" /> <!--1078px * 1314px-->
+
+                </div>
+                <div class="col-md-8" style="padding-left:0px">
+                    @Html.Partial("~/Views/Account/_RegisterForm.cshtml")
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    function changeUserIdLabel() {
+        var userRole = $("#UserRole").data("kendoDropDownList").value();
+        if (userRole == 'T') {
+            $("#userCodeLabel").text("Instructor ID");
+        }
+        if (userRole == 'S') {
+            $("#userCodeLabel").text("Student ID");
+        }
+        if (userRole == '') {
+            $("#userCodeLabel").text("Instructor ID / Student ID");
+        }
+    
+    }
+    $('#registerSuccessDarkModal').modal('show'); 
+    
+</script>

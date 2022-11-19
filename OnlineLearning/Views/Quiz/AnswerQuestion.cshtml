@@ -1,0 +1,137 @@
+﻿@model OnlineLearning.Models.QuizQuestionViewModels
+@{
+    ViewBag.Title = "Answer Quiz Question";
+    Layout = "~/Views/Shared/_QuizGameLayout.cshtml";
+}
+<div class="text-center row">
+    <div class="w3-padding-16 row">
+        <div class="row">
+            <h5><b>Welcome ! @Model.UserFullName</b></h5>
+        </div>
+        <div class="row">
+            <h2 class="text-indigo bolder" style="margin:0px"><b>@Model.CourseChannelName</b></h2>
+        </div>
+        <div class="row">
+            <h2 class="text-indigo bolder" style="margin:0px"><b>@Model.QuizName</b></h2>
+        </div>
+    </div>
+    <div class="row text-center">
+        <span class="text-gold smallPaddingTopBottom largePaddingLeftRight w3-round-xxlarge w3-xlarge bolder" style="font-family:'Poppins';background-color:white ">@Model.CurrentQuestionNumber / @Model.TotalQuestion</span>
+    </div>
+    <div class="row">
+        <div class="row w3-card w3-white w3-padding-16 ">
+            @if (Model.Question == null)
+            {
+            <div class="row text-danger w3-xlarge">
+                This quiz doesn't have any questions. Please inform the instructor to add some questions.
+            </div>
+            }
+            else
+            {
+                <div class="row bolder w3-xxlarge" style="word-wrap: break-word;">
+                    @Model.Question
+                </div>
+                <div class="row">
+                    @if (Model.AttachedImage != null && Model.AttachedImage != "")
+                    {
+                        <div>
+                            <img class="img-responsive centerBlock" style="width:30%" src="~/UploadedFiles/@Model.AttachedImage" />
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    @if (Model.AnswerList.Count != 0 && Model.AnswerList != null)
+    {
+        foreach (var item in Model.AnswerList)
+        {
+            <div class="col-md-6 text-center w3-padding-16 mediumPaddingLeftRight ">
+                <h3 style="border-width:3px" class="btn button-white w3-hover-text-brown w3-xlarge btn-lg width100 bolder" onclick="SaveAnswer('@item.Id')" id="@item.Id">
+                    @item.AnswerText
+                    <i class="w3-right w3-xxlarge" id="resultIcon_@item.Id"></i>
+                </h3>
+            </div>
+        }
+    }
+</div>
+
+<div class="row w3-padding-16 text-center">
+    <span id="nextSpin" class="w3-large alert alert-info bolder w3-margin-left w3-padding-16" style="display:none">
+        <i class="fa fa-spinner w3-spin"></i> Redirecting to Next Question..........
+    </span>
+</div>
+<div class="row w3-padding-16 text-center">
+    <span id="resultSpin" class="w3-large alert alert-info bolder w3-margin-left w3-padding-16" style="display:none">
+        <i class="fa fa-spinner w3-spin"></i> Redirecting to Result..........
+    </span>
+</div>
+
+<!--Audio-->
+<audio id="correctAudio">
+    <!--credit: audio from https://freesound.org/people/unadamlar/sounds/476178/ artist:unadamlar-->
+    <source src="~/Assest/correct-choice.wav" type="audio/mp3">
+    Your browser does not support the audio element.
+</audio>
+
+<!--Audio-->
+<audio id="wrongAudio">
+    <!--credit: audio from https://freesound.org/people/Raclure/sounds/483598/ artist:Raclure-->
+    <source src="~/Assest/wrong-choice.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+</audio>
+
+<script>
+    var correctAudio = document.getElementById("correctAudio"); 
+    var wrongAudio = document.getElementById("wrongAudio"); 
+    function SaveAnswer(answerId) {
+        //chosen answer's button add class w3-text-white background-indigo, remove button-white
+        $("#" + answerId).removeClass("button-white");
+        $("#" + answerId).addClass("w3-text-white background-indigo");
+        $(".btn").addClass("disabled");
+        var correctId;
+        $.ajax({
+            url: '@Url.Action("SaveAnswer", "Quiz")',
+            type: "GET",
+            data: {QuestionId: '@Model.Id', AnswerId: answerId},
+            success: function (result) {
+                $.each(result, function () {
+                    if (this.IsCorrect == true) {
+                        $("#resultIcon_" + this.Id).addClass("w3-text-green fa fa-check");
+                        correctId = this.Id;
+                    } else {
+                        $("#resultIcon_" + this.Id).addClass("w3-text-red fa fa-remove");
+                    }
+                });
+               
+                if (answerId == correctId) {
+                    //play correct sound
+                    correctAudio.volume = 0.5;
+                    correctAudio.play(); 
+
+                } else {
+                    //play wrong sound
+                    wrongAudio.volume = 0.5;
+                    wrongAudio.play(); 
+                }
+                if ('@Model.IsLastQuestion' == 'True') {
+                    $("#resultSpin").show();
+                    setTimeout(function () {
+                        location.href = "@Url.Action("detail","quiz",new { Id = Model.QuizId })";
+                    }, 1500); 
+                }
+                if ('@Model.IsLastQuestion' == 'False') {
+                    $("#nextSpin").show();
+                    setTimeout(function () {
+                        location.href = "@Url.Action("answerquestion","quiz",new { Id = Model.QuizId })";
+                    }, 1500); 
+                    
+                }
+                
+            }
+        });
+    }
+</script>

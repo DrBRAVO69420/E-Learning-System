@@ -1,0 +1,273 @@
+﻿@model OnlineLearning.Models.AssignmentViewModels
+@{
+    ViewBag.Title = "Create / Edit Assignment";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+<div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id = Model.CourseChannelId})"> Assignment List</a></li>
+            @if (Model.Id == null || Model.Id == Guid.Empty)
+            {
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editassignment" ? "active-breadcrumb-item" : "")" href="@Url.Action("editassignment","assignment")"> Add Assignment</a></li>
+            }
+            else
+            {
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editassignment" ? "active-breadcrumb-item" : "")" href="@Url.Action("editassignment","assignment",new { Id = Model.Id})"> Edit Assignment</a></li>
+
+            }
+        </ul>
+    </div>
+</div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id = Model.CourseChannelId})"> Assignment List</a></li>
+        @if (Model.Id == null || Model.Id == Guid.Empty)
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editassignment" ? "active-breadcrumb-item" : "")" href="@Url.Action("editassignment","assignment")"> Add Assignment</a></li>
+        }
+        else
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editassignment" ? "active-breadcrumb-item" : "")" href="@Url.Action("editassignment","assignment",new { Id = Model.Id})"> Edit Assignment</a></li>
+
+        }
+    </ul>
+</div>
+
+<div class="w3-panel sectionHeading">
+    @if (Model.Id == null || Model.Id == Guid.Empty)
+    {
+        <h3 class="text-indigo bolder">
+            Add Assignment
+        </h3>
+    }
+    else
+    {
+        <h3 class="text-indigo bolder">
+            Edit Assignment
+        </h3>
+    }
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="w3-white w3-card w3-padding-16 mediumPaddingLeftRight">
+        @using (Html.BeginForm("EditAssignment", "Assignment", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.CourseChannelId)
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <label class="required">Title</label>
+                    </div>
+                    <div class="row">
+                        @Html.Kendo().TextBoxFor(m => m.AssignmentTitle)
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.AssignmentTitle, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <label>Due Date & Time</label>
+                    </div>
+                    <div class="row">
+                        @Html.Kendo().DateTimePickerFor(m => m.DueDate).Format("yyyy-MM-dd hh:mm tt").Min(DateTime.Now).HtmlAttributes(new { @style = "width:50%" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <label class="required">Type</label>
+                    </div>
+                    <div class="row">
+                        @(Html.Kendo().DropDownListFor(m => m.Type)
+                                  .OptionLabel("-Select Assignment Type-")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .Events(e => e.Change("showGroupMemberMaxField"))
+                                  .BindTo(new List<SelectListItem>() {
+                                      new SelectListItem() {
+                                          Text = "Group",
+                                          Value = "Group"
+                                      },
+                                      new SelectListItem() {
+                                          Text = "Individual",
+                                          Value = "Individual"
+                                      }
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%" })
+                        )
+                        @Html.ValidationMessageFor(m => m.Type, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6" id="maxGroupMemberSection" style="display:none">
+                    <div class="row">
+                        <label class="required">Maximum Number of Member in a Group</label>
+                        <i class="glyphicon glyphicon-question-sign pointer-cursor"
+                           title="After this assignment is created, student can register their assignment group members according to this maximum number of member in a group" data-toggle="tooltip" data-placement="top"></i>
+                    </div>
+                    <div class="row">
+                        @Html.Kendo().NumericTextBoxFor(m => m.MemberMaxCount).Format("{n1}").HtmlAttributes(new { @style = "width:50%" })
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.MemberMaxCount, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <label class="required">Instruction</label>
+                    </div>
+                    <div class="row">
+                        @(Html.Kendo()
+                           .EditorFor(m => m.Instruction)
+                           .Tools(tools => tools
+                               .Clear()
+                               .Formatting()
+                               .Bold()
+                               .Italic()
+                               .Underline()
+                               .Strikethrough()
+                               .Outdent()
+                               .JustifyLeft()
+                               .JustifyCenter()
+                               .JustifyRight()
+                               .JustifyFull()
+                               .Indent()
+                               .InsertOrderedList()
+                               .InsertUnorderedList()
+                               .CreateLink()
+                               .TableEditing()
+                               .FontColor()
+                               .BackColor()
+                           )
+                       .Encode(false)
+                       .StyleSheets(css => css.Add(Url.Content("~/Content/customstyle.css")).Add(Url.Content("~/Content/w3css.css")))
+                       .Resizable(true)
+                       .Value(@<text>
+
+                    </text>)
+                        )
+                    </div>
+                    <div class="row">
+                        @Html.ValidationMessageFor(m => m.Instruction, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <label>Attachment</label>
+                    </div>
+                    <div class="row">
+                        @(Html.Kendo().Upload()
+                               .Name("attachments")
+                               .Multiple(false)
+                               .Messages(m => m.Select("Select File"))
+                               .HtmlAttributes(new { aria_label = "files" })
+                               .Validation(validation =>
+                                   validation.MaxFileSize(3000000)
+                                   )
+                               .Events(e => e.Select("validateFile"))
+                        )
+                    </div>
+                    <div id="addAssignmentError" class="row w3-medium alert alert-danger bolder" style="display:none">
+
+                    </div>
+                    <div class="row w3-medium w3-text-dark-gray smallPaddingTopBottom">
+                        <i class="glyphicon glyphicon-info-sign"></i> Only 1 attachment is allowed. You can upload zip file if there is more than one file. <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> New uploaded file will replace the old uploaded file. <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> Maximum File Size is 3 MB. <br />
+                        <i class="glyphicon glyphicon-info-sign"></i> File name cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | '<br />
+                    </div>
+                    @if (Model.Id != null && Model.Id != Guid.Empty)
+                    {
+                        <div class="row">
+                            <label>Attached File:</label> <a class="link bolder" href="~/AssignmentFiles/@Model.FileName" target='_blank'>@Model.FileName</a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <div class="row w3-padding-16 text-center">
+                <span class="smallPaddingLeftRight">
+                    <a href="@Url.Action("list","assignment",new { Id = Model.TopNavViewModels.CourseChannelId})" class="btn w3-white w3-border-indigo w3-hover-opacity w3-round-large btn-lg">Back</a>
+                </span>
+                <span class="smallPaddingLeftRight">
+                    <input class="button-indigo" value="Submit" type="submit" />
+                </span>
+            </div>
+        }
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        var type = $("#Type").data("kendoDropDownList").text();
+        if (type == "Group") {
+            $("#maxGroupMemberSection").show();
+        } else {
+            $("#maxGroupMemberSection").hide();
+        }
+    });
+
+    function showGroupMemberMaxField(e) {
+        var type = $("#Type").data("kendoDropDownList").text();
+        if (type == "Group") {
+            $("#maxGroupMemberSection").show();
+        } else {
+            $("#maxGroupMemberSection").hide();
+        }
+    }
+    // ------------------------- Validate File Upload -------------------------
+    function validateFile(e) {
+        $('#addAssignmentError').css('display', 'none');
+        var upload = $("#attachments").data("kendoUpload"), files = upload.getFiles();
+        var fileInfo = e.files[0];
+        var wrapper = this.wrapper;
+        $.each(e.files, function () {
+            var currentFileName = this.name;
+            var currentFileUid = this.uid;
+            // check whether the file name contain special characters
+            if (!charCheck(currentFileName)) {
+                $("#addAssignmentError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> The filename cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | ' Please rename your file and try again.");
+                $('#addAssignmentError').css('display', 'block');
+                e.preventDefault();
+                return;
+            }
+            // check whether file name already exists in database
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ValidateUpload", "Assignment")',
+                data: { currentFileName: currentFileName },
+                cache: false,
+                success: function (response) {
+                    if (response) {
+                        $("#addAssignmentError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> " + response);
+                        $('#addAssignmentError').css('display', 'block');
+                        $('#addAssignmentError').delay(3000).fadeOut(300);
+                        upload.removeFileByUid(currentFileUid);
+                    }
+                }
+            });
+        });
+    }
+    function charCheck(val) {
+        var chars = ['~', '#', '%', '&', '*', '{', '}', '\\', ':', '<', '>', '?', '/', '+', '|', '"', "'"];
+
+        for (var i = 0; i < chars.length; i++) {
+            if (val.indexOf(chars[i]) != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+</script>

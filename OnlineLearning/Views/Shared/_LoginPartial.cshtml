@@ -1,0 +1,16 @@
+﻿@using Microsoft.AspNet.Identity
+@using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="w3-dropdown-hover background-indigo">
+        <img id="profileImg" src="~/UploadedFiles/defaultProfilePic.png" width="40" height="40" class="img-circle" />
+        <a class="button-light @( (ViewContext.RouteData.Values["Action"].ToString() == "profile" && ViewContext.RouteData.Values["Id"].ToString() == User.Identity.GetUserId() ) || ViewContext.RouteData.Values["Action"].ToString() == "editprofile" || ViewContext.RouteData.Values["Action"].ToString() == "changepassword" ? "activeNavButton" : "")" title="account"><span id="nameLink"></span> <i class="fa fa-caret-down"></i></a>
+        <div class="w3-dropdown-content background-indigo small-card-4 w3-bar-block" style="right:-5px" id="manageAccountMenu">
+            <a id="myProfileLink" href="" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "profile" && ViewContext.RouteData.Values["Id"].ToString() == User.Identity.GetUserId() ? "activeNav" : "")">My Profile</a>
+            <a href="@Url.Action("editprofile","account")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "editprofile" ? "activeNav" : "")">Edit Profile</a>
+            <a href="@Url.Action("changepassword","account")" class="w3-bar-item button-light @(ViewContext.RouteData.Values["Controller"].ToString() == "account" && ViewContext.RouteData.Values["Action"].ToString() == "changepassword" ? "activeNav" : "")">Change Password</a>
+            <a href="javascript:document.getElementById('logoutForm').submit()" class="w3-bar-item button-light w3-left-align">Log Out</a>
+        </div>
+    </div>
+}

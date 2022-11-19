@@ -1,0 +1,319 @@
+﻿
+@{
+    ViewBag.Title = "Quiz Lists";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var teacherUser = false;
+    var studentUser = false;
+    if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+    {
+        teacherUser = true;
+    }
+    if (ViewContext.HttpContext.User.IsInRole("Student"))
+    {
+        studentUser = true;
+    }
+}
+
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        <i class="fa fa-list smallPaddingLeftRight"></i> Quiz List
+        @if (teacherUser)
+        {
+            <a class="link w3-small" style="cursor: pointer" onclick="document.getElementById('quizManual').style.display='block'">View User Manual</a>
+        }
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row w3-padding-16 small-margin-top">
+    <div class="w3-white w3-card smallPaddingLeftRight">
+        <div class="row">
+            @Html.Partial("~/Views/Shared/_SearchBarAndResetButton.cshtml", new ViewDataDictionary { { "GridId", "QuizGrid" }, { "SearchPlaceHolder", "Search Title / Instruction" } })
+        </div>
+        <div class="row">
+            @(Html.Kendo().Grid<OnlineLearning.Models.QuizViewModels>()
+                        .Name("QuizGrid")
+                        .Columns(columns =>
+                        {
+                            columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Quizzes").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                            columns.Bound(c => c.Id).Hidden();
+                            if (teacherUser)
+                            {
+                                columns.Bound(c => c.QuizTitle).ClientTemplate("<a class='link' href='" +
+    Url.Action("questionlist", "quiz") +
+    "/#=Id#' >#=QuizTitle#</a>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                                columns.Bound(c => c.Instruction).Encoded(false).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                                columns.Bound(c => c.strDueDateTime).Filterable(f => f.Enabled(false)).ClientTemplate(" #if(data.strDueDateTime == null){# <span class='bolder text-warning'>No Due Date</span> #}else{# #=strDueDateTime# #}# ").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                                columns.Bound(c => c.IsEnabled).Width(110).ClientTemplate("#if(data.IsEnabled == false){# <span class='label label-danger'>NO</span> #}else{# <span class='label label-success'>YES</span> #}#").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                                columns.Bound(c => c.strLastUpdate).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                                columns.Bound(c => c.TotalQuestion).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                                columns.Bound(c => c.AllQuestionsHaveAnswer).ClientTemplate("#if(data.AllQuestionsHaveAnswer == false){# <span class='label label-danger'>NO</span> #}else{# <span class='label label-success'>YES</span> #}#").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                            }
+                            if (studentUser)
+                            {
+                                columns.Bound(c => c.QuizTitle)
+                                .ClientTemplate("<div class='text-center'><p class='bolder' style='margin-bottom:2px'><a class='link bolder w3-large smallPaddingLeftRight' data-toggle='tooltip' data-placement='top' title='View Detail' href='" +
+    Url.Action("detail", "quiz") +
+    "/#=Id#'  >#=QuizTitle#</a> #if(data.Answered == true){# <span class='label label-success padding-0 smallPaddingLeftRight' style='font-size:11px' >Answered</span> #}else{# <span class='label label-danger small padding-0 smallPaddingLeftRight' style='font-size:11px' >Not Answered</span> #}# </p><div class='row'>#if(data.DueDateTime == null){# <span class='bolder text-warning'>No Due Date</span> #}else{# <i class='glyphicon glyphicon-time text-gold bolder'></i> Due On: <b>#=kendo.toString(DueDateTime,'yyyy-MM-dd hh:mm tt')#</b> <i class='fa fa-hourglass-half text-gold bolder'></i> Time Remaining: <b>#=TimeRemaining#</b>  #}#</div></div>")
+                                .HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                            }
+                            if (teacherUser)
+                            {
+                                columns.Command(command =>
+                                {
+                                    command.Custom("Edit").IconClass(" ").Text("<i class='glyphicon glyphicon-pencil edit-btn' style='font-size:18px'></i>").Click("EditSelectedQuiz");
+                                    command.Custom("ManageQuestion").IconClass(" ").Text("<i class='glyphicon glyphicon-question-sign password-btn' style='font-size:18px'></i>").Click("GotoQuestionList");
+                                    command.Custom("Enabled").IconClass(" ").Text("<i class='fa fa-check-square w3-text-green' style='font-size:18px'></i>").Click("EnabledQuiz").HtmlAttributes(new { title = "Enabled Quiz so that Students can Start the Quiz", id = "enabledQuizBtn" });
+                                    command.Custom("RemoveDueDate").IconClass(" ").Text("<i class='fa fa-calendar disable-btn' style='font-size:18px'></i>").Click("RemoveQuizDueDate").HtmlAttributes(new { @id="removeDueDateBtn"});
+                                    command.Custom("Destroy").IconClass(" ").Text("<i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i>").Click("DeleteSelectedQuiz");
+                                    command.Custom("Result").IconClass(" ").Text("<i class='glyphicon glyphicon-certificate w3-text-orange' style='font-size:18px'></i>").Click("ViewStudentResult");
+                                })
+                                .Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+
+                            }
+                        })
+.ToolBar(toolbar =>
+{
+    if (teacherUser)
+    {
+        toolbar.Custom().Name("addQuizBtn").Action("editquiz", "quiz", new { courseChannelId = Model.CourseChannelId }).IconClass("k-icon k-i-plus").Text("Add Quiz").HtmlAttributes(new { @id = "addQuizBtn", @class = "button-indigo" });
+    }
+})
+.NoRecords("<span class='text-danger bolder'>No Record</span>")
+.Editable(editable => editable.DisplayDeleteConfirmation("Quiz Questions, Answers, and Students' Answers will also be deleted and cannot be recovered. Are you sure to delete this record?"))
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_Quiz", "Quiz", new { CourseChannelId = Model.CourseChannelId }))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("onDataBoundGrid"))
+            )
+        </div>
+    </div>
+</div>
+
+
+<!-- ---------------------- User manual ---------------------- -->
+<div id="quizManual" class="w3-modal">
+    <div class="w3-modal-content w3-animate-zoom">
+        <div class="w3-container w3-display-container background-indigo w3-text-white w3-medium">
+            <span id="modalClose" onclick="document.getElementById('quizManual').style.display='none'" class="w3-button w3-hover-indigo w3-display-topright w3-large">x</span>
+            <h3 id="modalHeading" class="w3-large" style="padding-top:8px;padding-bottom:8px">@ViewBag.Title- Detail Features and Functions</h3>
+        </div>
+        <div class="w3-container w3-padding-16" id="modelContent">
+            <ul>
+                <li>
+                    <i class='glyphicon glyphicon-pencil edit-btn' style='font-size:18px'></i> = Edit the quiz detail
+                </li>
+                <li>
+                    <i class='glyphicon glyphicon-question-sign password-btn' style='font-size:18px'></i> = Manage the quiz's questions and answers
+                </li>
+                <li>
+                    <i class='fa fa-check-square w3-text-green' style='font-size:18px'></i> = Enable the quiz so that students can start the quiz game
+                </li>
+                <li>
+                    <i class='fa fa-calendar disable-btn' style='font-size:18px'></i> = Remove due date of the quiz
+                </li>
+                <li>
+                    <i class='glyphicon glyphicon-trash delete-btn' style='font-size:18px'></i> = Delete the quiz
+                </li>
+                <li>You can only enable <span title='Enabled Quiz so that Students can Start the Quiz'><i class='fa fa-check-square w3-text-green' style='font-size:18px'></i></span> a quiz once the quiz has question and all the questions have their answer.</li>
+                <li>Students can see a quiz only when it is enabled by you.</li>
+                <li>Questions that don't have answer will not be apperared for the students to answer it.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    @if (teacherUser)
+    {
+        <p class="col-template-val"><b><a class='link' href='@Url.Action("questionlist","quiz")/#=Id#'>#=data.QuizTitle#</a></b></p>
+        <p class="col-template-val">#=data.Instruction#</p>
+        <p class="col-template-val">
+            #if(data.strDueDateTime == null){# <span class='bolder text-warning'>No Due Date</span> #}else{# #=strDueDateTime# #}#
+        </p>
+        <p class="col-template-val">
+            #if(data.IsEnabled == false){# <span class='label label-danger'>NO</span> #}else{# <span class='label label-success'>YES</span> #}#
+        </p>
+        <p class="col-template-val">
+            #=strLastUpdate#
+        </p>
+    }
+    else
+    {
+        <div class='text-center'>
+            <h4 class='bolder' style='margin-bottom:2px'>
+                <a class='link bolder' data-toggle='tooltip' data-placement='top' title='View Detail' href='@Url.Action("detail","quiz")/#=Id#'>#=QuizTitle#</a>
+            </h4>
+            <div class='row'>
+                #if(data.strDueDateTime == null){# <span class='bolder text-warning'>No Due Date</span> #}
+                else{# <i class='glyphicon glyphicon-time text-gold bolder'></i> Due On: <b>#=strDueDateTime#</b>
+                <i class='fa fa-hourglass-half text-gold bolder'></i> Time Remaining: <b>#=TimeRemaining#</b>  #}#
+            </div>
+        </div>
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    if ('@TempData["QuizUpdated"]' != null && '@TempData["QuizUpdated"]' != "") {
+        displaySuccess("'@TempData["QuizUpdated"]'");
+    }
+    function ViewStudentResult(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("studentresult","quiz")/" + dataItem.Id;
+    }
+    $("#QuizGrid").kendoTooltip({
+        filter: ".k-grid-Edit",
+        position: "auto",
+        content: "Edit"       
+    });
+    $("#QuizGrid").kendoTooltip({
+        filter: ".k-grid-ManageQuestion",
+        position: "auto",
+        content: "Manage Questions"       
+    });
+    $("#QuizGrid").kendoTooltip({
+        filter: ".k-grid-Enabled",
+        position: "auto",
+        content: "Enable Quiz so that Student can Start now"       
+    });
+    $("#QuizGrid").kendoTooltip({
+        filter: ".k-grid-RemoveDueDate",
+        position: "auto",
+        content: "Remove Due Date"       
+    });
+    $("#QuizGrid").kendoTooltip({
+        filter: ".k-grid-Destroy",
+        position: "auto",
+        content: "Delete"       
+    });
+     $("#QuizGrid").kendoTooltip({
+        filter: ".k-grid-Result",
+        position: "auto",
+        content: "View Student Result"       
+    });
+    function onDataBoundGrid(e) {
+         $('#QuizGrid .k-grid-content').attr("style", "height:auto");
+        var grid = $("#QuizGrid").data("kendoGrid");
+        var items = e.sender.items();
+        items.each(function (index) {
+            var dataItem = grid.dataItem(this);
+            if (dataItem.HasQuestion == false) {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#enabledQuizBtn").addClass("k-state-disabled");
+            }
+            if (dataItem.TotalQuestion != dataItem.QuestionsHaveAnswers) {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#enabledQuizBtn").addClass("k-state-disabled");
+            }
+            if (dataItem.IsEnabled == true) {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#enabledQuizBtn").addClass("k-state-disabled");
+            }
+            if (dataItem.DueDateTime == null) {
+                $("tr[data-uid='" + dataItem.uid + "']").find("#removeDueDateBtn").addClass("k-state-disabled");
+            }
+
+
+        });
+    }
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    function EditSelectedQuiz(e) {
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("editquiz","quiz")?courseChannelId=" + dataItem.CourseChannelId + "&quizId=" + dataItem.Id;
+    }
+    function EnabledQuiz(e) {
+        e.preventDefault();
+        if (confirm("Are you sure to enabled the quiz to make it available for the students, so that students can start the quiz from now?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+            var grid = $("#QuizGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Enable_Quiz", "Quiz")',
+                type: "GET",
+                data: {Id: dataItem.Id},
+                success: function (error) {
+                    if (error == "") {
+                        grid.dataSource.read();
+                        grid.refresh();
+                        displaySuccess("Quiz Enabled Successfully!");
+                    } else {
+                        displayError(error);
+                    }
+                }
+            });
+        }else {
+            return;
+        }
+    }
+    function RemoveQuizDueDate(e) {
+        e.preventDefault();
+        if (confirm("Are you sure to remove the quiz's Due Date & Time?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+            $.ajax({
+                url: '@Url.Action("RemoveDueDate", "Quiz")',
+                type: "GET",
+                data: {Id: dataItem.Id},
+                success: function (error) {
+                    if (error == "") {
+                        $('#QuizGrid').data('kendoGrid').dataSource.read();
+                        $('#QuizGrid').data('kendoGrid').refresh();
+                        displaySuccess("Removed Successfully!");
+                    } else {
+                        displayError(error);
+                    }
+                }
+            });
+        }else {
+            return;
+        }
+
+    }
+    function DeleteSelectedQuiz(e) {
+        e.preventDefault();
+        if (confirm("Quiz Questions, Answers, and Students' Answers will also be deleted and cannot be recovered. Are you sure to delete this quiz?")) {
+            var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+            var grid = $("#QuizGrid").data("kendoGrid");
+            $.ajax({
+                url: '@Url.Action("Delete_Quiz", "Quiz")',
+                type: "GET",
+                data: { Id: dataItem.Id },
+                success: function (result) {
+                    grid.dataSource.read();
+                    grid.refresh();
+                    if (result == "") {
+                        displaySuccess("Deleted Successfully!");
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+    function GotoQuestionList(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+        location.href = "@Url.Action("questionlist","quiz")/" + dataItem.Id;
+    }
+</script>

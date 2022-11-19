@@ -1,0 +1,37 @@
+﻿@model OnlineLearning.Models.EnrollLinkViewModel
+@{
+    ViewBag.Title = "Enroll";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<h2 class="text-center text-indigo w3-padding-24">Enroll in @Model.CourseChannelName</h2>
+<div class="row w3-padding-16 text-center">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<script>
+    $(document).ready(function () {
+        sureEnroll('@Model.CourseChannelId','@Model.CourseChannelName');
+    });
+    function sureEnroll(courseId, courseName) {
+        if (confirm("Are you sure to enroll in " + courseName)) {
+            $.ajax({
+                url: '@Url.Action("EnrollInCourse", "CourseChannel")',
+                type: "GET",
+                data: { Id: courseId },
+                success: function (result) {
+                    if (result == "") {
+
+                        displaySuccess("Enrolled Successfully! Redirecting ......");
+                        location.href = "@Url.Action("manage","coursechannel")/" + courseId;
+                        //go to the course page
+                    } else {
+                        displayError(result);
+                    }
+                }
+            });
+        } else {
+            return;
+        }
+    }
+</script>
+

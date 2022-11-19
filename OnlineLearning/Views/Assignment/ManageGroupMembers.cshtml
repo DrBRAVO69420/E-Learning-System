@@ -1,0 +1,214 @@
+﻿@model OnlineLearning.Models.AssignmentViewModels
+@{
+    ViewBag.Title = "Manage Group Members";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+    var teacherUser = false;
+    var studentUser = false;
+    if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+    {
+        teacherUser = true;
+    }
+    if (ViewContext.HttpContext.User.IsInRole("Student"))
+    {
+        studentUser = true;
+    }
+}
+<style>
+    .k-grouping-row td {
+        color: #593fc8;
+        font-size: 18px;
+    }
+</style>
+<div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "manage" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id = Model.CourseChannelId})"> Assignment List</a></li>
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "managegroupmembers" ? "active-breadcrumb-item" : "")" href="@Url.Action("managegroupmembers","assignment")"> Manage Group Members</a></li>
+        </ul>
+    </div>
+</div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "manage" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id = Model.CourseChannelId})"> Assignment List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "managegroupmembers" ? "active-breadcrumb-item" : "")" href="@Url.Action("managegroupmembers","assignment")"> Manage Group Members</a></li>
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+      Manage Group Members
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="w3-card w3-white mediumPaddingLeftRight w3-padding-16">
+        <h4>Create a Group <span class="smallPaddingLeftRight w3-medium text-warning">( Note: Maximum members in a group: <b class="smallPaddingLeftRight bolder w3-large">@Model.MemberMaxCount</b> )</span></h4>
+        @using (Html.BeginForm("ManageGroupMembers", "Assignment", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.CourseChannelId)
+            <!-- AssignmentViewModels required fields, must put here so that they are submitted, to prevent errors-->
+            @Html.HiddenFor(m => m.AssignmentTitle)
+            @Html.HiddenFor(m => m.Instruction)
+            @Html.HiddenFor(m => m.Type)
+            <div class="row">
+                @Html.LabelFor(m => m.AssignmentGroupViewModels.GroupName, new { @class = "control-label required" })
+                @Html.Kendo().TextBoxFor(m => m.AssignmentGroupViewModels.GroupName)
+                @Html.ValidationMessageFor(m => m.AssignmentGroupViewModels.GroupName, "", new { @class = "text-danger" })
+            </div>
+            <div class="row">
+                @Html.LabelFor(m => m.AssignmentGroupViewModels.StudentIdList, new { @class = "control-label required" })
+                @(Html.Kendo().MultiSelectFor(m => m.AssignmentGroupViewModels.StudentIdList)
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .Filter("contains")
+                    .MaxSelectedItems((int)Model.MemberMaxCount)
+                    .Placeholder("- Select Students -")
+                    .AutoClose(false)
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAvailableStudentInCourse", "Assignment", new { courseChannelId = Model.CourseChannelId });
+                        });
+                    })
+                )
+                @Html.ValidationMessageFor(m => m.AssignmentGroupViewModels.StudentIdList, "", new { @class = "text-danger" })
+            </div>
+            <div class="row w3-padding-16">
+                <input type="submit" value="Create" class="button-indigo" />
+            </div>
+        }
+    </div>
+</div>
+@if (studentUser)
+{
+    <div class="row">
+        <div class="w3-card w3-white mediumPaddingLeftRight w3-padding-16">
+            <h4 class="text-indigo bolder">You are in Group: <b class="w3-text-black smallPaddingLeftRight">@Model.AssignmentGroupViewModels.GroupName</b></h4>
+            <div>
+                @if (Model.AssignmentSubmissionViewModels.Id == null || Model.AssignmentSubmissionViewModels.Id == Guid.Empty)
+                {
+                    <button id="leaveGroupBtn" type="button" class="button-indigo btn" onclick="leaveGroup()">Leave Group</button>
+                    <p id="leaveGroupError" class="text-danger" style="display:none">Your didn't join any group.</p>
+                }
+                else
+                {
+                    <button type="button" class="button-indigo btn disabled" disabled>Leave Group</button>
+                    <p class="text-danger">Your group has already submitted the assignment, you cannot leave the group anymore.</p>
+                }
+            </div>
+        </div>
+    </div>
+}
+<div class="row text-center">
+    <span id="leaveGroupSuccess" class="w3-large alert alert-success bolder width100 w3-padding-16" style="display:none">
+        <i class='glyphicon glyphicon-ok smallPaddingLeftRight'></i> Left Group Successfully!
+    </span>
+</div>
+<div class="row smallPaddingTopBottom">
+    <div class="row">
+        @(Html.Kendo().Grid<OnlineLearning.Models.AssignmentGroupViewModels>()
+                    .Name("AssignmentGroupGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Group and Member List").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                        columns.Bound(c => c.Id).Hidden();
+                        columns.Bound(c => c.GroupName).Hidden().HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.StudentName).ClientTemplate("<div class='text-left'><a href='/account/profile/#=StudentId#' target='_blank'><img src='/UploadedFiles/#=ProfilePic#' alt='profilepic' class='w3-circle' style='width:35px'></a> #=StudentName#</div>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                    })
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_AssignmentGroup", "Assignment", new { AssignmentId = Model.Id }))
+.Group(groups => groups.Add(g => g.GroupName))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('AssignmentGroupGrid')"))
+        )
+    </div>
+
+</div>
+@(Html.Kendo().Tooltip()
+      .For("#AssignmentGroupGrid")
+      .Filter(".forTooltips")
+      .Position(TooltipPosition.Top)
+)
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">#=iterate(data.StudentList)#</p>
+  
+</script>
+
+<script>
+     if ('@TempData["GroupCreated"]' != null && '@TempData["GroupCreated"]' != "") {
+        displaySuccess("'@TempData["GroupCreated"]'");
+    }
+    $(document).ready(function () {
+        if ('@Model.AssignmentGroupViewModels.Id' == '00000000-0000-0000-0000-000000000000') {
+            $("#leaveGroupBtn").attr("disabled", "disabled");
+            $("#leaveGroupBtn").addClass("disabled");
+        }
+
+    });
+
+    function leaveGroup() {
+        if ('@Model.AssignmentGroupViewModels.Id' == '00000000-0000-0000-0000-000000000000') {
+            $("#leaveGroupError").show();
+        } else {
+            if (confirm("Are you sure to leave the group " + '@Model.AssignmentGroupViewModels.GroupName')) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("LeaveGroup", "Assignment")',
+                    data: { Id: '@Model.AssignmentGroupViewModels.Id' },
+                    cache: false,
+                    success: function (result) {
+                        var successMessage = document.getElementById("successMessage");
+                        if (result == "") {
+                            $("#leaveGroupSuccess").show();
+                            $('#leaveGroupSuccess').delay(2000).fadeOut(300);
+                             var grid = $("#AssignmentGroupGrid").data("kendoGrid");
+                            grid.dataSource.read();
+                            grid.refresh();
+                        } else {
+                            displayError(result);
+                        }
+                    } 
+                });
+            } else {
+                return;
+            }
+        }
+    }
+
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    function iterate(object) {
+    var html = '';
+    if (object !== null && object != undefined) {
+        if (object.length > 0) {
+            object.forEach(function (data) {
+                console.log(data);
+                html += '<div class=\'text-left\'><a href=\'"@Url.Action("profile","account")"' + data.Id + '\' target=\'_blank\'><img src=\'/UploadedFiles/' + data.ProfilePicName + '\' alt=\'profilepic\' class=\'w3-circle\' style=\'width:35px\'  ></a> ' + data.Name + '</div>';
+            });
+        } else {
+            return '-';
+        }
+    } else {
+        html += '';
+    }
+    html += '';
+    return html;
+}
+</script>

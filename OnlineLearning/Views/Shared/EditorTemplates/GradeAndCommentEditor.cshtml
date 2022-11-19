@@ -1,0 +1,25 @@
+﻿@model OnlineLearning.Models.AssignmentSubmissionViewModels
+
+
+    <div class="k-form">
+        @Html.HiddenFor(m => m.Id)
+        <div class="editor-label required" style="text-align:left">
+            @Html.LabelFor(m => m.Grade)
+        </div>
+        <div class="editor-field">
+            @Html.Kendo().NumericTextBoxFor(m => m.Grade).Format("{0:n0}").Min(0).Max(100)
+            @Html.ValidationMessageFor(model => model.Grade, "", new { @class = "text-danger" })
+        </div>
+        <div class="editor-label required" style="text-align:left">
+            @Html.LabelFor(m => m.Comment)
+        </div>
+        <div class="editor-field">
+            @Html.Kendo().TextBoxFor(m => m.Comment)
+            @Html.ValidationMessageFor(model => model.Comment, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+
+
+
+

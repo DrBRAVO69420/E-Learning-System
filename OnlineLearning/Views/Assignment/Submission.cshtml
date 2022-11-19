@@ -1,0 +1,144 @@
+﻿@model OnlineLearning.Models.AssignmentSubmissionViewModels
+
+@{
+    ViewBag.Title = "Assignment Submission";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+    <div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id =Model.TopNavViewModels.CourseChannelId })"> Assignment List</a></li>
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","assignment",new { Id =Model.AssignmentId })"> Assignment Detail</a></li>
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "submission" ? "active-breadcrumb-item" : "")" href="@Url.Action("submission","assignment",new { assignmentid =Model.AssignmentId })"> Assignment Submission</a></li>
+            </ul>
+        </div>
+    </div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","assignment",new { Id =Model.TopNavViewModels.CourseChannelId })"> Assignment List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "detail" ? "active-breadcrumb-item" : "")" href="@Url.Action("detail","assignment",new { Id =Model.AssignmentId })"> Assignment Detail</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "submission" ? "active-breadcrumb-item" : "")" href="@Url.Action("submission","assignment",new { assignmentid =Model.AssignmentId })"> Assignment Submission</a></li>
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder">
+        @Model.AssignmentTitle Submission
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="w3-white w3-card padding-100 w3-padding-16">
+        @using (Html.BeginForm("Submission", "Assignment", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.HiddenFor(m => m.AssignmentId)
+            @Html.HiddenFor(m => m.AssignmentGroupId)
+            @Html.HiddenFor(m => m.AssignmentTitle)
+            @Html.HiddenFor(m => m.AssignmentType)
+            @Html.HiddenFor(m => m.StudentId)
+            <div id="postError" class="row w3-medium alert alert-danger bolder" style="display:none">
+
+            </div>
+            <div class="row">
+                <label class="required">File Submission</label>
+            </div>
+            <div class="row">
+                @(Html.Kendo().Upload()
+                       .Name("attachments")
+                       .Multiple(false)
+                       .Messages(m => m.Select("Select File"))
+                       .HtmlAttributes(new { aria_label = "files" })
+                       .Validation(validation =>
+                           validation.MaxFileSize(95000000)
+                           )
+                       .Events(e => e.Select("validateFile"))
+                )
+            </div>
+            <div id="fileSubmissionError" class="row w3-medium alert alert-danger bolder" style="display:none">
+
+            </div>
+            <div class="row w3-medium w3-text-dark-gray smallPaddingTopBottom">
+                <i class="glyphicon glyphicon-info-sign"></i> Only 1 attachment is allowed. You can upload zip file if there is more than one file. <br />
+                <i class="glyphicon glyphicon-info-sign"></i> New uploaded file will replace the old uploaded file. <br />
+                <i class="glyphicon glyphicon-info-sign"></i> Maximum File Size is 95 MB. <br />
+                <i class="glyphicon glyphicon-info-sign"></i> File name cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | '<br />
+            </div>
+
+            if (Model.AssignmentType.Equals("Group"))
+            {
+                if (Model.AssignmentGroupId == Guid.Empty || Model.AssignmentGroupId == null)
+                {
+                    <div class="row w3-padding-16">
+                        <input class="button-indigo" value="Submit" type="submit" disabled />
+                    </div>
+                    <div class="row text-danger alert alert-danger">
+                        You cannot submit this assignment unless you joined an assignment group.
+                    </div>
+                }
+                else
+                {
+                    <div class="row w3-padding-16">
+                        <input class="button-indigo" value="Submit" type="submit" />
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="row w3-padding-16">
+                    <input class="button-indigo" value="Submit" type="submit" />
+                </div>
+            }
+
+        }
+    </div>
+</div>
+<script>
+    if ('@TempData["NoGroupError"]' != null && '@TempData["NoGroupError"]' != "") {
+        displayError("'@TempData["NoGroupError"]'");
+    }
+    // ------------------------- Validate File Upload -------------------------
+    function validateFile(e) {
+        $('#fileSubmissionError').css('display', 'none');
+        var upload = $("#attachments").data("kendoUpload"), files = upload.getFiles();
+        var fileInfo = e.files[0];
+        var wrapper = this.wrapper;
+        $.each(e.files, function () {
+            var currentFileName = this.name;
+            var currentFileUid = this.uid;
+            // check whether the file name contain special characters
+            if (!charCheck(currentFileName)) {
+                $("#fileSubmissionError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> The filename cannot contain any of the following characters: \" # % & * : < > ? \ / { } ~ | ' Please rename your file and try again.");
+                $('#fileSubmissionError').css('display', 'block');
+                e.preventDefault();
+                return;
+            }
+            // check whether file name already exists in database
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ValidateUpload", "Assignment")',
+                data: { currentFileName: currentFileName },
+                cache: false,
+                success: function (response) {
+                    if (response) {
+                        $("#fileSubmissionError").html("<i class='fa fa-warning smallPaddingLeftRight'></i> " + response);
+                        $('#fileSubmissionError').css('display', 'block');
+                        $('#fileSubmissionError').delay(3000).fadeOut(300);
+                        upload.removeFileByUid(currentFileUid);
+                    }
+                }
+            });
+        });
+    }
+    function charCheck(val) {
+        var chars = ['~', '#', '%', '&', '*', '{', '}', '\\', ':', '<', '>', '?', '/', '+', '|', '"', "'"];
+
+        for (var i = 0; i < chars.length; i++) {
+            if (val.indexOf(chars[i]) != -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+</script>

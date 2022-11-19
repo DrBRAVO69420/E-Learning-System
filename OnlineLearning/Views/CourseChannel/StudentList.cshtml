@@ -1,0 +1,170 @@
+﻿@model OnlineLearning.Models.CourseChannelViewModel
+@{
+    ViewBag.Title = "Student List";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+<style>
+    .k-grid tr td {
+        border-style: solid;
+        border-color: transparent;
+    }
+
+    .k-grid-header {
+        display: none;
+    }
+</style>
+<div class="row">
+    <div class="row">
+        <div class="w3-panel sectionHeading">
+            <h3 class="text-indigo bolder">
+                <i class="glyphicon glyphicon-user"></i> Students
+            </h3>
+        </div>
+    </div>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="w3-white w3-card small-margin-top">
+    <div class="row">
+        @Html.Partial("~/Views/Shared/_SearchBarAndResetButton.cshtml", new ViewDataDictionary { { "GridId", "StudentGrid" }, { "SearchPlaceHolder", "Search Name / Student ID" } })
+    </div>
+    <div class="row center-block" style="width:100%;">
+        @(Html.Kendo().Grid<OnlineLearning.Models.UserViewModel>
+            ()
+            .Name("StudentGrid")
+            .Columns(columns =>
+            {
+            columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Student List").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+columns.Bound(c => c.Id).Hidden();
+columns.Bound(c => c.ProfilePic).Width(250).ClientTemplate("<div class='text-center'><a href='" +
+    Url.Action("profile", "account") +
+    "/#=data.Id#' target='_blank'><img src='/UploadedFiles/#=data.ProfilePic#' alt='#=data.ProfilePic#' class='w3-circle' style='width:45px'  ></a></div>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" }).Media("(min-width: 420px)");
+columns.Bound(c => c.Name).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" }).Media("(min-width: 420px)");
+columns.Bound(c => c.Code).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;" }).Media("(min-width: 420px)");
+if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+{
+columns.Command(command =>
+{
+command.Custom("UnenrollStudent").IconClass(" ").Text("<i class='glyphicon glyphicon-log-out' style='font-size:18px'></i>").Click("UnenrollStudent").HtmlAttributes(new { style = "color:blue", title = "Unenroll Student" });
+}).Width(150).Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+}
+})
+    .ToolBar(toolbar =>
+{
+    //toolbar.Custom().Action("CreateExam", "Exam", new { Id = "" }).IconClass("k-icon k-i-plus").Text("Add New Exam");
+    toolbar.Pdf().HtmlAttributes(new { style = "background-color: #593fc8;color: white;border: 1px solid #593fc8;", @class = "w3-hover-opacity" });
+    toolbar.Excel().HtmlAttributes(new { style = "background-color: #593fc8;color: white;border: 1px solid #593fc8;", @class = "w3-hover-opacity" });
+    
+}
+)
+.Pdf(pdf => pdf
+.AllPages()
+.AvoidLinks()
+.PaperSize("A4")
+.Scale(0.8)
+.Date(DateTime.Now)
+.Margin("2cm", "1cm", "1cm", "1cm")
+.Landscape()
+.RepeatHeaders(false)
+.TemplateId("page-template")
+.FileName( @Model.TopNavViewModels.CourseChannelName + " Students.pdf")
+.ProxyURL(Url.Action("Pdf_Export_Save", "GeneralFunction"))
+)
+.Excel(excel => excel
+.FileName(@Model.TopNavViewModels.CourseChannelName + " Students.xlsx")
+.Filterable(true)
+.AllPages(true)
+.ProxyURL(Url.Action("Excel_Export_Save", "GeneralFunction"))
+)
+.Pageable()
+.Sortable()
+.NoRecords("<span class='text-danger bolder'>No Record</span>")
+.Resizable(r => r.Columns(true))
+.Scrollable()
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators
+.ForString(str => str.Clear()
+.Contains("Contains")
+.IsEqualTo("Is equal to")
+)
+.ForDate(dt => dt.Clear()
+.IsEqualTo("Is equal to")
+.IsGreaterThan("Is after")
+.IsLessThan("Is before")
+)
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Events(events => events.Error("error_handler")/*.Sync("sync_handler")*/)
+.Model(model =>
+{
+model.Id(m => m.Id);
+})
+.Read(read => read.Action("Read_Students", "CourseChannel", new { Id = Model.TopNavViewModels.CourseChannelId }))
+.Events(e => e.RequestEnd("onRequestEnd"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('StudentGrid')"))
+        )
+    </div>
+</div>
+
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">
+
+        <a href='@Url.Action("profile","account")/#=data.UserId#' target='_blank'>
+            <img src='/UploadedFiles/#=data.ProfilePic#' alt='#=data.ProfilePic#' class='w3-circle' style='width:25px'>
+        </a>
+        <span class="smallPaddingLeftRight">
+            #=data.Name#
+        </span>
+        <span class="smallPaddingLeftRight">
+            #=data.Code#
+        </span>
+    </p>
+   
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    $("#StudentGrid").kendoTooltip({
+        filter: ".k-grid-UnenrollStudent",
+        position: "auto",
+        content: "Unenroll Student"       
+    });
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    function UnenrollStudent(e) {
+         e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        if (confirm("All the student's quizzes, assignment submissions, assignment groups, discussion topics, and replies will also be deleted and cannot be recovered. Are you sure to unenroll this student from the course?")) {
+            displayProcessSpin();
+            $.ajax({
+                url: '@Url.Action("UnEnroll", "CourseChannel")',
+                data: { studentId: dataItem.Id, courseChannelId: '@Model.TopNavViewModels.CourseChannelId' },
+                type: "GET",
+                success: function (errorMsg) {
+                    hideProcessSpin();
+                    if (errorMsg == "") {
+                        $('#StudentGrid').data('kendoGrid').dataSource.read();
+                        $('#StudentGrid').data('kendoGrid').refresh();
+                        displaySuccess("Unenrolled Student Successfully!");
+                    }
+                },
+                error: function (errorMsg) {
+                    displayError(errorMsg);
+                }
+            });
+        } else {
+            return;
+        }
+    }
+</script>
+

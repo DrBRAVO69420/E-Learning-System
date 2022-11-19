@@ -1,0 +1,89 @@
+﻿@model OnlineLearning.Models.CourseChannelViewModel
+@using Microsoft.AspNet.Identity;
+@{
+    var userid = User.Identity.GetUserId();
+}
+
+@if (Model.CoursesList.Count == 0)
+{
+    <div class='w3-card w3-white w3-round-medium text-center w3-padding-32'>
+        <p class='text-center centerBlock'>
+            <img width='200' height='200' src='/Assest/empty.png' />
+        </p>
+        <h3 class='text-danger text-center bolder'>No Record</h3>
+    </div>
+}
+else
+{
+    <div class="w3-row-padding">
+        @foreach (var item in Model.CoursesList)
+        {
+            <div class="w3-col l3 m6 w3-margin-bottom">
+                <div class="w3-card w3-round-large w3-white">
+                    <div class="w3-tooltip w3-hide-small img-responsive">
+                        <span class="w3-text w3-tag pointer-cursor" style="position:absolute;left:0;bottom:45px">@item.Name</span>
+                        @if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+                        {
+                            <a href="@Url.Action("manage","coursechannel",new { Id = item.Id})">
+                                <img class="w3-hide-small" src="@item.ImageSource"
+                                     style="width:100%;height:130px;border-top-left-radius:8px;border-top-right-radius:8px" />
+                            </a>
+                        }
+                        else
+                        {
+                            if (item.StudentList.Contains(userid))
+                            {
+                                <a href="@Url.Action("manage","coursechannel",new { Id = item.Id})">
+                                    <img class="w3-hide-small" src="@item.ImageSource"
+                                         style="width:100%;height:130px;border-top-left-radius:8px;border-top-right-radius:8px" />
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="#">
+                                    <img class="w3-hide-small" src="@item.ImageSource"
+                                         style="width:100%;height:130px;border-top-left-radius:8px;border-top-right-radius:8px" />
+                                </a>
+                            }
+                        }
+
+                    </div>
+                    <div class="w3-container w3-round-large w3-white" style="padding-bottom:10px">
+                        <h4 class="course-channel-name bolder one-line-text" style="margin:2px 0px 2px 0px" title="@item.Name">@Html.Raw(item.FormattedName)</h4>
+                        @if (ViewContext.HttpContext.User.IsInRole("Student"))
+                        {
+                            <p>by <a target="_blank" class="bolder link small" href="@Url.Action("profile","account",new { Id = item.CreatorUserId})">@item.CreatorName</a></p>
+                        }
+                        <p class="w3-hide-small one-line-text" title="@item.Description">
+                            @Html.Raw(item.FormattedDescription)
+                        </p>
+                        <p class="w3-opacity-min bolder small">
+                            @item.StudentCount Students
+                        </p>
+                        @if (ViewContext.HttpContext.User.IsInRole("Teacher"))
+                        {
+                            <p>
+                                <a class="button-border-line" href="@Url.Action("manage","coursechannel",new { Id = item.Id})"><i class="fa fa-pencil"></i> Enter & Edit</a>
+                                <span class="button-border-line w3-border-red w3-text-red w3-hover-text-white w3-hover-red pointer-cursor" onclick="deleteCourse('@item.Id','@item.Name')"><i class="glyphicon glyphicon-trash"></i> </span>    
+                            </p>
+                        }
+                        @if (ViewContext.HttpContext.User.IsInRole("Student"))
+                        {
+                            if (item.StudentList.Contains(userid))
+                            {
+                                <p><a class="button-border-line width100" href="@Url.Action("manage","coursechannel",new { Id = item.Id})"><i class="fa fa-play"></i> Enter & Learn</a></p>
+                            }
+                            else
+                            {
+                                <p><a class="button-border-line width100 w3-hover-text-white w3-hover-teal w3-text-teal w3-border-teal" href="#" onclick="sureEnroll('@item.Id','@item.Name')"><i class="glyphicon glyphicon-plus-sign"></i> Enroll</a></p>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+
+

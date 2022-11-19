@@ -1,0 +1,84 @@
+﻿@model OnlineLearning.Models.AnnouncementViewModel
+@{
+    ViewBag.Title = "Edit General Announcement";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+
+<div class="w3-panel sectionHeading">
+    @if (Model.Id.Equals(Guid.Empty) || Model.Id == null)
+    {
+        <h3 class="text-indigo bolder"><i class="glyphicon glyphicon-cog"></i> Create Announcement</h3>
+    }
+    else
+    {
+        <h3 class="text-indigo bolder"><i class="glyphicon glyphicon-cog"></i> Edit Announcement</h3>
+    }
+</div>
+<div class="row padding-0">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "general" ? "active-breadcrumb-item" : "")" href="@Url.Action("general","announcement")"> Announcement List</a></li>
+        @if (Model.Id.Equals(Guid.Empty))
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editgeneral" ? "active-breadcrumb-item" : "")" href="@Url.Action("editgeneral","announcement")"> Create Announcement</a></li>
+        }
+        else
+        {
+            <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "editgeneral" ? "active-breadcrumb-item" : "")" href="@Url.Action("editgeneral","announcement",new { Id =Model.Id })"> Edit Announcement</a></li>
+        }
+    </ul>
+</div>
+<div class="row">
+    <div class="w3-white w3-card mediumPaddingLeftRight w3-padding-16">
+        @using (Html.BeginForm("EditGeneral", "Announcement", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            <div class="smallPaddingTopBottom">
+                @Html.LabelFor(m => m.TitleText, new { @class = "required" })
+                @Html.Kendo().TextBoxFor(m => m.TitleText)
+                @Html.ValidationMessageFor(m => m.TitleText, "", new { @class = "text-danger" })
+            </div>
+            <div class="smallPaddingTopBottom">
+                @Html.LabelFor(m => m.Details, new { @class = "required" })
+                @(Html.Kendo()
+                            .EditorFor(m => m.Details)
+                            .Tools(tools => tools
+                                .Clear()
+                                //.Formatting()
+                                .Bold()
+                                .Italic()
+                                .Underline()
+                                .Outdent()
+                                .JustifyLeft()
+                                .JustifyCenter()
+                                .JustifyRight()
+                                .JustifyFull()
+                                .Indent()
+                                .InsertOrderedList()
+                                .InsertUnorderedList()
+                                .CreateLink()
+                                .TableEditing()
+                                .FontColor()
+                                .BackColor()
+                            )
+                        .Encode(false)
+                        .StyleSheets(css => css.Add(Url.Content("~/Content/customstyle.css")).Add(Url.Content("~/Content/w3css.css")))
+                        .Resizable(true)
+                        .Value(@<text>
+
+                        </text>)
+                )
+                @Html.ValidationMessageFor(m => m.Details, "", new { @class = "text-danger" })
+            </div>
+            <div class="row">
+                <span class="smallPaddingLeftRight">
+                    <a href="@Url.Action("general","announcement")" class="btn btn-lg w3-white w3-border-indigo w3-hover-opacity w3-round-large btn-lg">Back</a>
+                </span>
+                <span class="smallPaddingLeftRight">
+                    <input type="submit" value="Submit" class="button-indigo btn btn-lg" />
+                </span>
+            </div>
+        }
+    </div>
+    
+</div>
+

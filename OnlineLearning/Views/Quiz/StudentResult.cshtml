@@ -1,0 +1,173 @@
+﻿@model OnlineLearning.Models.QuizViewModels
+@{
+    ViewBag.Title = "Student Result";
+    Layout = "~/Views/Shared/_LayoutManageCourseChannel.cshtml";
+}
+
+    <div class="row breadcrumb-affix w3-hide-large" data-spy="affix" data-offset-top="100">
+        <div class="container-fluid">
+            <ul class="breadcrumb">
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.CourseChannelId})"> Quiz List</a></li>
+                <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "studentresult" ? "active-breadcrumb-item" : "")" href="@Url.Action("studentresult","quiz",new { Id = Model.Id})"> @Model.QuizTitle Students' Result</a></li>
+            </ul>
+        </div>
+    </div>
+<div class="row w3-hide-medium w3-hide-small">
+    <ul class="breadcrumb">
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "list" ? "active-breadcrumb-item" : "")" href="@Url.Action("list","quiz",new { Id = Model.CourseChannelId})"> Quiz List</a></li>
+        <li><a class="breadcrumb-item @( ViewContext.RouteData.Values["Action"].ToString() == "studentresult" ? "active-breadcrumb-item" : "")" href="@Url.Action("studentresult","quiz",new { Id = Model.Id})"> @Model.QuizTitle Students' Result</a></li>
+    </ul>
+</div>
+<div class="w3-panel sectionHeading">
+    <h3 class="text-indigo bolder smallPaddingTopBottom">
+        @Model.QuizTitle Students' Result
+    </h3>
+</div>
+<div class="row text-center padding-0">
+    @Html.Partial("~/Views/Shared/_SuccessErrorMessage.cshtml")
+</div>
+<div class="row small-margin-top">
+    <div class="w3-white w3-card mediumPaddingLeftRight">
+        <div class="row">
+            <div class="col-md-2">
+                @Html.LabelFor(m => m.QuizTitle)
+            </div>
+            <div class="col-md-10">
+                @Html.DisplayFor(m => m.QuizTitle)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                @Html.LabelFor(m => m.Instruction)
+            </div>
+            <div class="col-md-10">
+                @Html.DisplayFor(m => m.Instruction)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                @Html.LabelFor(m => m.DueDateTime)
+            </div>
+            <div class="col-md-10">
+                @if (Model.DueDateTime == null)
+                {
+                    <span class="text-warning">No Due Date</span>
+                }
+                else
+                {
+                    @Html.DisplayFor(m => m.DueDateTime)
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row w3-padding-16">
+    <div class="row">
+        @(Html.Kendo().Grid<OnlineLearning.Models.StudentQuizViewModel>()
+                    .Name("StudentResultGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Template(@<text></text>).ClientTemplate("#=resColTemplate(data)#").Title("Question List").Media("(max-width: 420px)"); //display this layout when device's width less than 420px
+                        columns.Bound(c => c.Id).Hidden();
+                        columns.Bound(c => c.StudentName).ClientTemplate("<div class='text-center'><a href='" +
+                            Url.Action("profile", "account") +
+                            "/#=data.StudentId#'  target='_blank'><img src='/UploadedFiles/#=data.ProfilePic#' alt='#=data.ProfilePic#' class='w3-circle' style='width:45px'  ></a> #=StudentName#</div>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.CorrectCount).ClientTemplate("<span class='label label-success w3-large'>#=CorrectCount#</span>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.WrongCount).ClientTemplate("<span class='label label-danger w3-large'>#=WrongCount#</span>").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Bound(c => c.strQuizStartedOn).Filterable(f => f.Enabled(false)).HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;color:black;" }).Media("(min-width: 420px)");
+                        columns.Command(command =>
+                        {
+                            command.Custom("Detail").IconClass(" ").Text("<span class='forTooltips' title='View Detail'><i class='glyphicon glyphicon-eye-open edit-btn' style='font-size:18px'></i></span>").Click("ViewStudentResultDetail");
+                        })
+                        .Title("Action").HeaderHtmlAttributes(new { style = "font-weight:bold; white-space:normal; overflow:visible;", @class = "actionColumn" }).HtmlAttributes(new { @class = "actionColumn" });
+                    })
+    .ToolBar(toolbar =>
+{
+    //toolbar.Custom().Action("CreateExam", "Exam", new { Id = "" }).IconClass("k-icon k-i-plus").Text("Add New Exam");
+    toolbar.Pdf().HtmlAttributes(new { style = "background-color: #593fc8;color: white;border: 1px solid #593fc8;", @class = "w3-hover-opacity" });
+    toolbar.Excel().HtmlAttributes(new { style = "background-color: #593fc8;color: white;border: 1px solid #593fc8;", @class = "w3-hover-opacity" });
+    
+}
+)
+.Pdf(pdf => pdf
+.AllPages()
+.AvoidLinks()
+.PaperSize("A4")
+.Scale(0.8)
+.Date(DateTime.Now)
+.Margin("2cm", "1cm", "1cm", "1cm")
+.Landscape()
+.RepeatHeaders(false)
+.TemplateId("page-template")
+.FileName( @Model.QuizTitle + " Results.pdf")
+.ProxyURL(Url.Action("Pdf_Export_Save", "GeneralFunction"))
+)
+.Excel(excel => excel
+.FileName(@Model.QuizTitle + " Results.xlsx")
+.Filterable(true)
+.AllPages(true)
+.ProxyURL(Url.Action("Excel_Export_Save", "GeneralFunction"))
+)
+.Pageable()
+.Resizable(resize => resize.Columns(true))
+.Filterable(filterable => filterable
+.Extra(false)
+.Operators(operators => operators.ForString(str => str.Clear().Contains("Contains").IsEqualTo("Is equal to"))
+.ForDate(dt => dt.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is after").IsLessThan("Is before"))
+.ForNumber(num => num.Clear().IsEqualTo("Is equal to").IsGreaterThan("Is greater than").IsLessThan("Is less than"))
+)
+)
+.Sortable()
+.Scrollable()
+.Pageable(pageable => pageable.ButtonCount(5).PageSizes(new List<object> { 5, 8, 10, 20, 30, 40, 50, "all" }))
+.DataSource(dataSource => dataSource
+.Ajax()
+.PageSize(8)
+.Model(model =>
+{
+    model.Id(p => p.Id);
+})
+.Read(read => read.Action("Read_StudentResult", "Quiz", new { QuizId = Model.Id }))
+.Events(e => e.RequestEnd("onRequestEnd").Error("error_handler"))
+)
+.Events(e => e.DataBound("Grid_onDataBound('StudentResultGrid')"))
+        )
+    </div>
+
+</div>
+@(Html.Kendo().Tooltip()
+      .For("#StudentResultGrid")
+      .Filter(".forTooltips")
+      .Position(TooltipPosition.Top)
+)
+<!-- ---------------------- Responsive template for the table ---------------------- -->
+<script id="responsive-column-template" type="text/x-kendo-template">
+    <p class="col-template-val">
+
+        <div class='text-center'><a href='@Url.Action("profile","account")/#=data.StudentId#' target='_blank'><img src='/UploadedFiles/#=data.ProfilePic#' alt='#=data.ProfilePic#' class='w3-circle' style='width:45px'></a> #=StudentName#</div>
+    </p>
+    <p class="col-template-val">
+        <span class="smallPaddingLeftRight">
+            Answered <span class='label label-success'>#=CorrectCount#</span> Correctly
+        </span>
+    </p>
+    <p class="col-template-val">
+        <span class="smallPaddingLeftRight">
+            Answered <span class='label label-success'>#=WrongCount#</span> Wrongly
+        </span>
+    </p>
+    <p>
+        Quiz started On: #=strQuizStartedOn#
+    </p>
+</script>
+
+<script>
+    var resColTemplate = kendo.template($("#responsive-column-template").html());
+    function ViewStudentResultDetail(e) {
+        e.preventDefault();
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr")); //get the selected row item values
+        location.href = "@Url.Action("detail","quiz")/" + dataItem.Id + "?studentId=" + dataItem.StudentId;
+
+    }
+</script>

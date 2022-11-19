@@ -1,0 +1,299 @@
+﻿@model OnlineLearning.Models.TeacherHomeDashboardViewModels
+@{
+    ViewBag.Title = "Instructor Home";
+    Layout = "~/Views/Shared/_LayoutAfterLogin.cshtml";
+}
+<style>
+    label {
+        margin-bottom: 0px;
+        font-weight: lighter;
+    }
+
+    h1 {
+        margin-top: 0px;
+        font-family: "Poppins";
+        font-size: 48px;
+        font-weight: bolder;
+    }
+
+  .panel{
+      margin-bottom:0px;
+  }
+  @@media (max-width:420px) {
+        .dashboardColumn {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    }
+</style>
+<div class="row mediumPaddingLeftRight">
+    <h3 class="text-indigo bolder w3-round-medium mediumPaddingTopBottom smallPaddingLeftRight" style="background-color:#f0f0f5;margin-bottom:0px;">
+        <i class="glyphicon glyphicon-bullhorn"></i> Latest News & Announcements
+    </h3>
+    <div class="row" style="padding-top:0px">
+    @Html.Partial("~/Views/Shared/_LatestNewsAnnouncements.cshtml")
+</div>
+</div>
+
+<div class="row w3-padding-16 dashboardColumn">
+    <div class="col-md-3">
+        <div class="w3-card w3-container w3-padding-16" style="background-color: #c7a4ca;color: #0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-briefcase w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h1>@Model.TotalCourseChannels</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>@Html.LabelFor(m => m.TotalCourseChannels)</h4>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="w3-card w3-container w3-padding-16" style="background-color:#d7ca96;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-tasks w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h1>@Model.TotalAssignment</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>@Html.LabelFor(m => m.TotalAssignment)</h4>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="w3-card w3-container w3-padding-16" style="        background-color: #f0f0df;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-question-sign w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h1>@Model.TotalQuizzes</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>@Html.LabelFor(m => m.TotalQuizzes)</h4>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="w3-card w3-container w3-padding-16" style="background-color:#b6ccb1;color:#0a1210;">
+            <div class="w3-left"><i class="glyphicon glyphicon-comment w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h1>@Model.TotalDiscussionTopics</h1>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>@Html.LabelFor(m => m.TotalDiscussionTopics)</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel">
+            <div class="panel-heading bolder w3-border-bottom mediumPaddingTopBottom" style="background-color:white;color:#402e37;">
+                <h6 class="bolder" style="margin:0px">
+                    <i class="glyphicon glyphicon-time text-gold"></i>
+                    5 Upcoming Expired Assignments
+                </h6>
+            </div>
+            <div class="panel-body">
+                @if (Model.UpcomingExpiredAssignments.Count == 0)
+                {
+                    <div class="text-center text-danger">
+                        No Record
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model.UpcomingExpiredAssignments)
+                    {
+                        <div class="row">
+                            <div class="row w3-opacity small">
+                                @item.CourseChannelName
+                            </div>
+                            <div class="row" style="font-size:15px">
+                                <div class="col-md-3 bolder" style="padding:0px 5px 0px 5px">
+                                    <a class="link bolder" href="@Url.Action("detail","assignment",new { Id = item.Id})" target="_blank">@item.AssignmentTitle</a>
+                                </div>
+                                <div class="col-md-4" style="padding:0px 5px 0px 5px">
+                                    Due On @item.DueDate
+                                </div>
+                                <div class="col-md-5 text-gold bolder" style="padding:0px 5px 0px 5px">
+                                    @item.TimeRemaining
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel">
+            <div class="panel-heading bolder w3-border-bottom mediumPaddingTopBottom" style="background-color:white;color:#402e37;">
+                <h6 class="bolder" style="margin:0px">
+                    <i class="glyphicon glyphicon-time text-gold"></i>
+                    5 Upcoming Expired Quizzes
+                </h6>
+            </div>
+            <div class="panel-body">
+                @if (Model.UpcomingExpiredQuizzes.Count == 0)
+                {
+                    <div class="text-center text-danger">
+                        No Record
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model.UpcomingExpiredQuizzes)
+                    {
+                        <div class="row small">
+                            <div class="row w3-opacity">
+                                @item.CourseChannelName
+                            </div>
+                            <div class="row" style="font-size:15px">
+                                <div class="col-md-3 bolder" style="padding:0px 5px 0px 5px">
+                                    <a class="link bolder" href="@Url.Action("questionlist","quiz",new { Id = item.Id})" target="_blank">@item.QuizTitle</a>
+                                </div>
+                                <div class="col-md-4" style="padding:0px 5px 0px 5px">
+                                    Due On @item.DueDateTime
+                                </div>
+                                <div class="col-md-5 text-gold bolder" style="padding:0px 5px 0px 5px">
+                                    @item.TimeRemaining
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row w3-padding-16 dashboardColumn">
+    <div class="col-md-4">
+        <div class="w3-border w3-container w3-padding-16" style="background-color: white;color:#855389;">
+            <h4 class="bolder">@Html.LabelFor(m => m.ReceivedAssignments)</h4>
+            <div class="w3-left">
+                <h1>@Model.ReceivedAssignments</h1>
+            </div>
+            <i class="glyphicon glyphicon-file w3-right w3-xxxlarge"></i>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="w3-border w3-container w3-padding-16" style="background-color: white;color:#5a4e22;">
+            <h4 class="bolder">@Html.LabelFor(m => m.GradedAssignments)</h4>
+            <div class="w3-left">
+                <h1>@Model.GradedAssignments</h1>
+            </div>
+            <i class="glyphicon glyphicon-ok w3-right w3-xxxlarge"></i>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="w3-border w3-container w3-padding-16" style="background-color:white;color:#2e5325;">
+            <h4 class="bolder">@Html.LabelFor(m => m.NonGradedAssignments)</h4>
+            <div class="w3-left">
+                <h1>@Model.NonGradedAssignments</h1>
+            </div>
+            <i class="glyphicon glyphicon-warning-sign w3-right w3-xxxlarge"></i>
+        </div>
+    </div>
+</div>
+
+<div id="announcementDetailModal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-zoom">
+        <div class="w3-container w3-display-container background-indigo w3-text-white w3-medium">
+            <span id="modalClose" onclick="document.getElementById('announcementDetailModal').style.display='none'" class="w3-button w3-hover-indigo w3-display-topright w3-large">x</span>
+            <h3 id="modalHeading" class="w3-large" style="padding-top:8px;padding-bottom:8px">
+
+            </h3>
+        </div>
+        <div class="w3-container w3-padding-16" id="modelContent">
+            
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel">
+            <div class="panel-heading bolder w3-border-bottom mediumPaddingTopBottom" style="background-color:white;color:#402e37;">
+                <h6 class="bolder" style="margin:0px">
+                    <i class="glyphicon glyphicon-comment text-gold"></i>
+                    5 new Discussion Topics
+                </h6>
+            </div>
+            <div class="panel-body">
+                @if (Model.NewDiscussionTopics.Count == 0)
+                {
+                    <div class="text-center text-danger">
+                        No Record
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model.NewDiscussionTopics)
+                    {
+                        <div class="row">
+                            <div class="row w3-opacity small">
+                                @item.CourseChannelName
+                            </div>
+                            <div class="row" style="font-size:15px">
+                                <div class="col-md-4 bolder" style="padding:0px 5px 0px 5px">
+                                    <a class="link bolder" href="@Url.Action("detail","thread",new { Id = item.Id})" target="_blank">@item.ThreadTitle</a>
+                                </div>
+                                <div class="col-md-4" style="padding:0px 5px 0px 5px">
+                                    By @item.Name
+                                </div>
+                                <div class="col-md-4 text-gold bolder" style="padding:0px 5px 0px 5px">
+                                    On @item.LastUpdate
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel">
+            <div class="panel-heading bolder w3-border-bottom mediumPaddingTopBottom" style="background-color:white;color:#402e37;">
+                <h6 class="bolder" style="margin:0px">
+                    <i class="glyphicon glyphicon-wrench text-gold"></i>
+                    5 Oldest Assignments that haven't Graded
+                </h6>
+            </div>
+            <div class="panel-body">
+                @if (Model.OldestAssignmentsHaventGraded.Count == 0)
+                {
+                    <div class="text-center text-danger">
+                        No Record
+                    </div>
+                }
+                else
+                {
+                    foreach (var item in Model.OldestAssignmentsHaventGraded)
+                    {
+                        <div class="row small">
+                            <div class="row w3-opacity">
+                                @item.CourseChannelName
+                            </div>
+                            <div class="row" style="font-size:15px">
+                                <div class="col-md-3 bolder" style="padding:0px 5px 0px 5px">
+                                    <a class="link bolder" href="@Url.Action("detail","assignment",new { Id = item.AssignmentId})" target="_blank">@item.AssignmentTitle</a>
+                                </div>
+                                <div class="col-md-4" style="padding:0px 5px 0px 5px">
+                                    @if (item.GroupName == "")
+                                    {
+                                        @item.StudentName
+                                    }
+                                    else
+                                    {
+                                        @item.GroupName
+                                    }
+                                </div>
+                                <div class="col-md-5 text-gold bolder" style="padding:0px 5px 0px 5px">
+                                    @item.SubmissionDate
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
